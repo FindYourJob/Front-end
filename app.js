@@ -11,9 +11,13 @@ FYJApp.config(['$routeProvider',
 	templateUrl: 'templates/accueil.html',
 	controller: 'AccueilController'
       }).
-      when('/ShowOrders', {
-	templateUrl: 'templates/show_orders.html',
-	controller: 'ShowOrdersController'
+      when('/Stats-Annonces', {
+	templateUrl: 'templates/stats-annonces.html',
+	controller: 'AccueilController'
+      }).
+      when('/Graphe-Job-Company', {
+	templateUrl: 'templates/graphes-job-company.html',
+	controller: 'AccueilController'
       }).
       otherwise({
 	redirectTo: '/Accueil'
