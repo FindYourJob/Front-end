@@ -1,0 +1,38 @@
+[
+  {
+    "id":"1",
+    "title":"Emploi test",
+    "url":"http:\/\/www.moncul.com\/zbra-42",
+    "date":"2015-05-01",
+    "town":"COMPIEGNE",
+    "postalCode":"60200",
+    "type":"CDI",
+    "company":"ACME",
+    "wage":"70000",
+    "text":"Coucou voil\u00e0 c'est une offre d'emploi =D"
+  },
+  {
+    "id":"2",
+    "title":"Développeur .NET C# Agile H/",
+    "url":"https://remixjobs.com/emploi/Developpement/Developpeur-NET-C-Agile-H-F/30530",
+    "date":"2015-05-22",
+    "town":"PARIS",
+    "postalCode":"75015",
+    "type":"CDI",
+    "company":"Prêt d'Union",
+    "wage":"30000",
+    "text":"La société\nCréée en 2009, Prêt d’Union (www.pret-dunion.fr) est une plateforme de crédit entre particuliers, et le leader français du « Crowdfunding ». C’est une nouvelle génération d’établissement bancaire sur internet, qui permet à des investisseurs de financer directement les prêts à l’équipement de ménages français. Le concept de Prêt d’Union est simple : réduire les coûts d’intermédiation bancaire et proposer aux emprunteurs des crédits moins chers et aux investisseurs un produit d’épargne fortement rémunérateur. Prêt d’Union dispose de son propre agrément bancaire (Etablissement de Crédit – Prestataire de services d’investissement).\nPrêt d’Union rassemble un actionnariat puissant : des institutionnels (Crédit Mutuel Arkéa, AG2R La Mondiale), un leader international de l’internet (Schibsted-Le Bon Coin), et certains des plus grands business angels français (Xavier Niel, fondateur de Free ; les fondateurs de la Financière de l’Echiquier, Poweo, Netgem, PriceMinister…)"
+  },
+  {
+    "id":"3",
+    "title":"Développeur Web Full Stack H/F",
+    "url":"https://remixjobs.com/emploi/Developpement/Developpeur-Web-Full-Stack-H-F/30519",
+    "date":"2015-05-22",
+    "town":"PARIS",
+    "postalCode":"75000",
+    "type":"CDI",
+    "company":"Kidioui",
+    "wage":"44000",
+    "text":"En tant que développeur full-stack vous interviendrez aussi bien sur le développement de nouvelles fonctionnalités que sur l'adaptation du site aux mobiles et tablettes ou sur l'intégration d'une nouvelle charte graphique, avec toujours pour but l'amélioration de l'expérience utilisateur. - See more at: https://remixjobs.com/emploi/Developpement/Developpeur-Web-Full-Stack-H-F/30519#sthash.4PxQ2UpU.dpuf"
+  }
+]

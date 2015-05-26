@@ -1,0 +1,71 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script type="text/javascript" src="scripts/menu.js"></script>
+<link rel="stylesheet" type="text/css" href="css/menu.css">
+	<style>
+			.link {
+			  stroke: #ccc;
+			}
+
+			.node {
+			  cursor: move;
+			  
+			  stroke: #000;
+			  stroke-width: 1.5px;
+			}
+
+			.node text {
+			  pointer-events: none;
+			  font: 10px sans-serif;
+			  stroke-width: 0px;
+			}
+		</style>
+
+   	<div class="graphContainer cbp-spmenu-push">
+    		<img class="cbp-spmenu-button" id="left-button1" src="images/parameters.png" alt="parameters"/>
+    		<nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left" id="left-menu1">
+    			<h3> Paramétres </h3>
+    			<div class="panel-group" id="accordion">
+	    			<div class="panel panel-default" id="panel1">
+				        <div class="panel-heading">
+				             <h4 class="panel-title">
+				        <a data-toggle="collapse" data-target="#collapseOne" 
+				           href="" class="collapsed">
+				          Filtres
+				        </a>
+				      </h4>
+
+				        </div>
+				        <div id="collapseOne" class="panel-collapse collapse">
+				            <div class="panel-body"></div>
+				        </div>
+				    </div>
+				</div>
+			</nav>
+
+    		<nav class="cbp-spmenu" id="nodeMenu" style="display:none;">
+    			<div class="clearfix">
+	    			<h3> Informations </h3>
+	    			<span class="pull-right">
+	    				<span class="glyphicon glyphicon-remove cbp-spmenu-close" id="closeNode"></span>
+	    			</span>
+	    		</div>
+    			<div class="panel-group" id="accordion">
+	    			<div class="panel panel-default" id="panel2">
+				        <div class="panel-heading">
+				             <h4 class="panel-title">
+				        <a data-toggle="collapse" data-target="#collapseTwo" 
+				           href="" class="collapsed">
+				          Informations Entreprise
+				        </a>
+				      </h4>
+
+				        </div>
+				        <div id="collapseTwo" class="panel-collapse collapse">
+				            <div class="panel-body"></div>
+				        </div>
+				    </div>
+				</div>
+    		</nav>
+    	</div>
