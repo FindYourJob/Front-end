@@ -44,7 +44,8 @@ var map = new google.maps.Map(d3.select("#map").node(), {
 });
 
 // Load the station data. When the data comes back, create an overlay.
-d3.json("convertcsvShort.json", function(data) {
+d3.json("jobs.json", function(data) {
+  console.log(data);
   var overlay = new google.maps.OverlayView();
 
   // Add the container when the overlay is added to the map.
@@ -76,10 +77,10 @@ d3.json("convertcsvShort.json", function(data) {
           .attr("x", padding + 7)
           .attr("y", padding)
           .attr("dy", ".31em")
-          .text(function(d) { return d.value["libelle"]; });
+          .text(function(d) { return d.value["title"]; });
 
       function transform(d) {
-        d = new google.maps.LatLng(d.value["longitude"], d.value["latitude"]);
+        d = new google.maps.LatLng(d.value["lat"], d.value["long"]);
         console.log(d);
         d = projection.fromLatLngToDivPixel(d);
         console.log(d);
