@@ -1,0 +1,69 @@
+/* General layout */
+
+  .global-container { 
+	height : 100%;
+	width : 100%;
+	padding-top: 80px; }
+  .top-buffer { margin-top:20px; }
+  .content {
+    display:table-cell;
+    vertical-align:middle;
+    text-align:center;
+  }
+
+
+/* Carousel */
+  .carousel-inner img {
+    margin: auto;
+  }
+  .checkbox label{
+    margin-right:12px;
+  }
+
+
+/* Menu */
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+  .dropdown-toggle {
+    cursor:default;
+  }
+
+
+/* Geomap */
+  html, body, .ng-scope {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+#map {
+    width: 50%;
+    height: 80%;
+    margin: 0;
+    padding: 0;
+margin-left: auto;
+  margin-right: auto;
+  }
+
+
+
+
+
+  .stations, .stations svg {
+    position: absolute;
+  }
+
+  .stations svg {
+    width: 60px;
+    height: 20px;
+    padding-right: 100px;
+    font: 10px sans-serif;
+  }
+
+  .stations circle {
+    fill: brown;
+    stroke: black;
+    stroke-width: 1.5px;
+  }
