@@ -31,7 +31,7 @@
 
 
 /* Geomap */
-  html, body, .ng-scope {
+  html, body,  .global-container > .ng-scope {
     width: 100%;
     height: 100%;
     margin: 0;
