@@ -90,8 +90,17 @@ var map = new google.maps.Map(d3.select("#map").node(), {
 });
 
 // Load the station data. When the data comes back, create an overlay.
-d3.json("jobsWithLatLong.json", function(data) {
-  console.log(data);
+//d3.json("jobsWithLatLong.json", function(data) {
+d3.xhr("http://trendyjobs.fr/backend/getJobAdvertsLocated/20", function(data) {
+  data=JSON.parse(data["response"]);
+
+  //Mise à jour des coordonnées pour introduire un peu de flou au cas où il existerait des points avec les mêmes coordonnées.
+  for(var d in data)
+  {
+     data[d]["lat"]=(parseFloat(data[d]["lat"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
+     data[d]["long"]=(parseFloat(data[d]["long"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
+  }
+
   var overlay = new google.maps.OverlayView();
 
   // Add the container when the overlay is added to the map.
@@ -127,9 +136,9 @@ d3.json("jobsWithLatLong.json", function(data) {
 
       function transform(d) {
         d = new google.maps.LatLng(d.value["lat"], d.value["long"]);
-        console.log(d);
+        //d = new google.maps.LatLng(d.value["lat"]+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.1), d.value["long"]);
+        //d = new google.maps.LatLng(d.value["lat"]+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.01), d.value["long"]+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.001));
         d = projection.fromLatLngToDivPixel(d);
-        console.log(d);
         return d3.select(this)
             .style("left", (d.x - padding) + "px")
             .style("top", (d.y - padding) + "px");
