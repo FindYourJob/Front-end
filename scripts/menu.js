@@ -39,8 +39,8 @@ $( document ).ready(function(){
 	$("#nodeMenu .panel-title a").click(function(){
 		console.log("CLICKED");
 		setTimeout(function() {
-			$("#nodeMenu").css("left", $("svg").width() - $("#nodeMenu").width() - 5 + "px");
-		});
+			$("#nodeMenu").css("left", $("svg").width() - $("#nodeMenu").width() - 35 + "px");
+		},1000);
 	})
 	
 });

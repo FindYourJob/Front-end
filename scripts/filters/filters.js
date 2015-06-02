@@ -15,13 +15,15 @@ if(typeof TrendyJob.Filters == "undefined"){
 TrendyJob.Filters = {
     FiltersType : {
         "numeric" : {
-            "display": "<div> <input type=\"number\" id=\"PROPNAME-filter-numeric-over\" name=\"PROPNAME-filter-numeric-over\"/> &gt; PROPNAME &lt; <input type=\"number\" id=\"PROPNAME-filter-numeric-under\" name=\"PROPNAME-filter-numeric-under\" </div>"
+            "display": "<div> <input type=\"number\" id=\"PROPNAME-filter-numeric-over\" name=\"PROPNAME-filter-numeric-over\" value=\"OVER-VAL\" /> &gt; PROPNAME &lt; <input type=\"number\" id=\"PROPNAME-filter-numeric-under\" name=\"PROPNAME-filter-numeric-under\" value=\"UNDER-VAL\"/> </div>"
         },
         'comboBox': {
-            "display": "<div> PROPNAME : <select> CBLIST </select> </div>"
+            "display": "<div> PROPNAME : <select id=\"NODENAME-PROPNAME-cb\"> LIST </select> </div>"
         },
         'multiText': {
-            "display" : "<div class=\"ui-widget\"> PROPNAME : <input type=\"text\" name=\"PROPNAME\" id=\"PROPNAME-autocomplete\"> </input> </div> \n <div id=\"PROPNAME-selected-list\"></div>"
+            //"display" : "<div class=\"ui-widget\"> PROPNAME : <input type=\"text\" name=\"PROPNAME\" id=\"PROPNAME-autocomplete\"> </input> </div> \n <div id=\"PROPNAME-selected-list\"></div>"
+            //"display" : "<select id=\"PROPNAME-multiText\" name=\"PROPNAME-multiText\" multiple=\"multiple\"> LIST </select>"
+            "display" : "<div isteven-multi-select id=\"NODENAME-PROPNAME-mt\" input-model=\"mtlist\" output-model=\"mtlist_out\" button-label=\"BUTTON-LABEL\" item-label=\"ITEM-LABEL\" max-labels=\"2\" max-height=\"200px\" tick-property=\"ticked\" on-item-click=\"itemclickfn()\" on-select-all=\"selectallfn()\" on-select-none=\"selectnonefn()\" on-reset=\"resetfn()\"> </div>"
         },
         'date' : {
             "display" : "<div> PROPNAME : </div>"
@@ -30,7 +32,7 @@ TrendyJob.Filters = {
     NodeFilters: {
         'job': {
             'filtersType': {
-                'title': 'multiText',
+                /*'title': 'multiText',*/
                 'town': 'multiText',
                 'type': 'comboBox',
                 'company': 'multiText',
@@ -40,7 +42,42 @@ TrendyJob.Filters = {
             // TODO : la définition des listes devraient pas avoir lieu là, l'user veut juste saisir pour chaque prop le type de filtre, il n'a pas à faire ça!
             'multiTextList': {},
             'comboBoxList': {},
-            'numericList' : {}
+            'numericList' : {},
+            'scope': {},
+            'activeFilterList': {}
+        }
+    },
+    resetFilters: function(nodeType){
+        current = TrendyJob.Filters.NodeFilters[nodeType];
+        current.multiTextList = {};
+        current.comboBoxList = {};
+        current.numericList = {};
+    },
+    refreshFilters: function(nodes, nodeType){
+        TrendyJob.Filters.resetFilters(nodeType);
+        $.each(nodes,function(k,node){
+            TrendyJob.Filters.fillFilters(node);
+        });
+        $.each(TrendyJob.Filters.NodeFilters[nodeType].scope,function(k,scope){
+            scope.mtlist = TrendyJob.Filters.NodeFilters[nodeType].multiTextList[k];
+            if(!$.isArray(nodes)){
+                scope.mtlist = [];
+            }
+            scope.$apply();
+        });
+        $.each(TrendyJob.Filters.NodeFilters[nodeType].comboBoxList,function(k,cbList){
+            selectItem = $("#" + nodeType + "-" + k + "-cb");
+            optionsItemList = "";
+            for(var i=0;i<cbList.length;++i){
+                current = cbList[i];
+                optionsItemList+="<option value=\"" + current + "\">" + current + "</option>";
+            }
+            selectItem.empty();
+            selectItem.append(optionsItemList);
+        });
+        // Empty combobox if array empty
+        if(!$.isArray(nodes)){
+
         }
     },
     fillFilters: function (nodeObject) {
@@ -60,10 +97,11 @@ TrendyJob.Filters = {
                         current.numericList[key] = {"minVal" : nodeObject[key], "maxVal" : nodeObject[key]};
                     } else {
                         nlist = current.numericList[key];
-                        if(nlist.minVal > nodeObject[key]){
-                            nlist.minVal = nodeObject[key];
-                        } else if(nlist.maxVal < nodeObject[key]){
-                            nlist.maxVal = nodeObject[key];
+                        var val = parseFloat(nodeObject[key]);
+                        if(nlist.minVal > val){
+                            nlist.minVal = val;
+                        } else if(nlist.maxVal < val){
+                            nlist.maxVal = val;
                         }
                     }
                 }
@@ -73,75 +111,140 @@ TrendyJob.Filters = {
                 if (typeof modifiedList[key] == 'undefined') {
                     modifiedList[key] = [];
                 }
-                if($.inArray(nodeObject[key],modifiedList[key]) == -1){
-                    modifiedList[key].push(nodeObject[key]);
+                if(nodeObject[key] != "") {
+                    if ($.inArray(nodeObject[key], modifiedList[key]) == -1) {
+                        if (filtersType[key] == "multiText") {
+                            var inArray = false;
+                            for (var i = 0; i < modifiedList[key].length; ++i) {
+                                if (modifiedList[key][i].text == nodeObject[key]) {
+                                    inArray = true;
+                                    break;
+                                }
+                            }
+                            if (!inArray) {
+                                modifiedList[key].push({"text": nodeObject[key], "ticked": true});
+                            }
+                        } else {
+                            modifiedList[key].push(nodeObject[key]);
+                        }
+                    }
                 }
 
             }
         }
     },
-    createPageFilters: function(nodeTypes){
+    createPageFilters: function(nodeTypes, scope){
         var filterBody = $("#left-menu1 .panel-body");
-        for(i=0;i<nodeTypes.length;++i){
+        for(var i=0;i<nodeTypes.length;++i){
             nodeFilters = TrendyJob.Filters.NodeFilters[nodeTypes[i]];
             for (var key in nodeFilters.filtersType) {
                 if (filtersType.hasOwnProperty(key)) {
-                    TrendyJob.Filters.generateFilter(nodeFilters,key,filterBody);
+                    TrendyJob.Filters.generateFilter(nodeFilters,key, nodeTypes[i], filterBody, scope);
                 }
             }
         }
     },
-    generateFilter: function(nodeFilters, key, filterBody){
+    generateFilter: function(nodeFilters, key, nodeType, filterBody, scope){
         displayContent = TrendyJob.Filters.FiltersType[nodeFilters.filtersType[key]].display;
         displayContent = displayContent.replace(/PROPNAME/g,key);
-        if(nodeFilters.filtersType[key] == "comboBox"){
+        displayContent = displayContent.replace(/NODENAME/g,nodeType);
+        filterType = nodeFilters.filtersType[key];
+        if(filterType == "comboBox"){
             cbList = "";
-            for(i=0;i<nodeFilters["comboBoxList"][key].length;++i){
-                current = nodeFilters["comboBoxList"][key][i];
+            ftList = filterType + "List";
+            for(var i=0;i<nodeFilters[ftList][key].length;++i){
+                current = nodeFilters[ftList][key][i];
                 cbList+="<option value=\"" + current + "\">" + current + "</option>";
             }
-            displayContent = displayContent.replace("CBLIST",cbList);
+            displayContent = displayContent.replace("LIST",cbList);
             filterBody.append(displayContent);
         }
-        if(nodeFilters.filtersType[key] == "multiText"){
-            filterBody.append(displayContent);
-            ac = $( "#" + key + "-autocomplete");
-            ac.autocomplete({
-                source: nodeFilters.multiTextList[key]
-            });
-            ac.data("selectedList",[]);
-            ac.data("propname",key);
-            $("#" + key + "-autocomplete").bind("autocompleteselect", function (event, ui) {
-
-                autocList = $(this).autocomplete("option","source");
-                // Remove the element and overwrite the classes var
-                autocList.splice(autocList.indexOf(ui.item.value),1);
-                // Re-assign the source
-                $(this).autocomplete("option","source",autocList);
-                arr = $(this).data("selectedList");
-                arr.push(ui.item.value);
-                $(this).data("selectedList",arr);
-                $("#" + $(this).data("propname") + "-selected-list").append("<span>" + ui.item.value + "</span><br/>");
-            });
+        if(filterType == "multiText"){
+            superArray = [];
+            displayContent = displayContent.replace(/BUTTON-LABEL/g,"text");
+            displayContent = displayContent.replace(/ITEM-LABEL/g,"text");
+            angular.element(document.body).injector().invoke(function($compile) {
+                newScope = scope.$new();
+                newScope.mtlist = nodeFilters[filterType + "List"][key];
+                var selectedList = function(mtlist_out){
+                    nodeFilters.activeFilterList[key] = $.grep(GraphManager.getInstance().getNodes(nodeType),function(n){
+                        return $.inArray(n[key],mtlist_out) != -1;
+                    });
+                    TrendyJob.Filters.refreshNodeList(nodeFilters,nodeType);
+                };
+                newScope.itemclickfn = function(){
+                    var mtlist_out = $(angular.element("#" + nodeType + "-" + key + "-mt").scope().mtlist_out).map(function(){
+                        return this.text;
+                    });
+                    selectedList(mtlist_out);
+                }
+                newScope.selectallfn = function(){
+                    var mtlist_out = $(angular.element("#" + nodeType + "-" + key + "-mt").scope().mtlist).map(function(){
+                        return this.text;
+                    });
+                    selectedList(mtlist_out);
+                };
+                newScope.selectnonefn = function(){
+                    var mtlist_out = [];
+                    selectedList(mtlist_out);
+                };
+                newScope.resetfn = newScope.selectallfn;
+                displayContent = angular.element(displayContent);
+                filterBody.append($compile(displayContent)(newScope));
+                newScope.$apply();
+                nodeFilters.scope[key] = newScope;
+        });
+            //scope.$apply;
         }
-        if(nodeFilters.filtersType[key] == "numeric"){
+        if(filterType == "numeric"){
+            displayContent = displayContent.replace(/OVER-VAL/g,nodeFilters.numericList[key].minVal-1);
+            displayContent = displayContent.replace(/UNDER-VAL/g,nodeFilters.numericList[key].maxVal+1);
             filterBody.append(displayContent);
-            $("#" + key + "-filter-numeric-under").change(function(){
-                var valName = $(this).attr("id").split("-")[0];
-                var value = $(this).val();
-                D3.nodes = $.grep(D3.nodes,function(n) {
-                    return parseInt(n[valName]) < value;
+            $.each(["under","over"], function(n,type){
+                var previous;
+                console.log(type);
+                $("#" + key + "-filter-numeric-" + type).focus(function(){
+                    previous = $(this).val();
+                    console.log(previous);
+                }).change(function(){
+                    var valName = $(this).attr("id").split("-")[0];
+                    console.log(previous);
+                    if(!$.isNumeric($(this).val())){
+                        $(this).val(previous);
+                    }
+                    if(type == "over"){
+                        if($(this).val()<nodeFilters.numericList[key].minVal-1){
+                            $(this).val(nodeFilters.numericList[key].minVal-1);
+                        }
+                    } else {
+                        if($(this).val()>nodeFilters.numericList[key].maxVal+1){
+                            $(this).val(nodeFilters.numericList[key].maxVal+1);
+                        }
+                    }
+                    var value = $(this).val();
+                    nodeFilters.activeFilterList[key + "-" + type] = $.grep(GraphManager.getInstance().getNodes(nodeType),function(n) {
+                        if(type == "under"){
+                            ret = parseInt(n[valName]) < value;
+                        } else {
+                            ret = parseInt(n[valName]) > value;
+                        }
+                        return ret;
+                    });
+                    TrendyJob.Filters.refreshNodeList(nodeFilters,nodeType);
                 });
-                D3.update();
-            });
-            $("#" + key + "-filter-numeric-over").change(function(){
-                var valName = $(this).attr("id").split("-")[0];
-                var value = $(this).val();
-                D3.nodes = $.grep(D3.nodes,function(n) {
-                    return parseInt(n[valName]) > value;
-                });
-                D3.update();
             });
         }
+    },
+    refreshNodeList: function(nodeFilters,nodeType){
+        D3.nodes = GraphManager.getInstance().getNodes(nodeType);
+        $.each(nodeFilters.activeFilterList, function(key,list){
+            //intersect arrays
+            console.log(list);
+            D3.nodes = $.grep(D3.nodes, function(v){
+               return $.inArray(v,list) != -1;
+            });
+        });
+        //TrendyJob.Filters.refreshFilters(D3.nodes,nodeType);
+        D3.update();
     }
 };
