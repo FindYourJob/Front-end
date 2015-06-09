@@ -2,8 +2,6 @@
 var FYJApp = angular.module('FYJApp', ['ngRoute','isteven-multi-select']);
 
 //Define Routing for app
-//Uri /AddNewOrder -> template AddOrder.html and Controller AddOrderController
-//Uri /ShowOrders -> template ShowOrders.html and Controller AddOrderController
 FYJApp.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
@@ -13,14 +11,22 @@ FYJApp.config(['$routeProvider',
       }).
       when('/Stats-Annonces', {
 	templateUrl: 'templates/stats-annonces.html',
-	controller: 'AccueilController'
+	controller: 'DefaultController'
+      }).
+      when('/Stats-Company', {
+	templateUrl: 'templates/stats-company.html',
+	controller: 'StatsCompanyController'
+      }).
+      when('/Stats-Annonces', {
+	templateUrl: 'templates/stats-annonces.html',
+	controller: 'DefaultController'
       }).
       when('/Graphe-Job-Company', {
 	templateUrl: 'templates/graphes-job-company.html',
 	controller: 'GraphesJCController'
       }).
       when('/Geo-Annonces', {
-	templateUrl: 'templates/testd3GoogleMap.html',
+	templateUrl: 'templates/geo-annonces.html',
 	controller: 'GeoAnnoncesController'
       }).
       otherwise({
@@ -70,97 +76,17 @@ FYJApp.controller("GraphesJCController", function($scope){
 });
 
 
-FYJApp.controller('AddOrderController', function($scope) {
-	
-	$scope.message = 'This is Add new order screen';
-	alert("coucou");
-	
-});
+FYJApp.controller('DefaultController', function($scope) {
 
-
-FYJApp.controller('ShowOrdersController', function($scope) {
-
-	$scope.message = 'This is Show orders screen';
-	alert("coucou");
+	console.log("Default controller called");
 
 });
 
 
 FYJApp.controller("GeoAnnoncesController", function($scope){
 
-// Create the Google Map…
-var map = new google.maps.Map(d3.select("#map").node(), {
-  zoom: 5,
-  center: new google.maps.LatLng(46.7157467, 2.2096957),
-  mapTypeId: google.maps.MapTypeId.TERRAIN
-});
+  console.log("Controller Annonces");
 
-// Load the station data. When the data comes back, create an overlay.
-//d3.json("jobsWithLatLong.json", function(data) {
-d3.xhr("http://trendyjobs.fr/backend/getJobAdvertsLocated/20", function(data) {
-  data=JSON.parse(data["response"]);
-    console.log(data);
-
-  //Mise à jour des coordonnées pour introduire un peu de flou au cas où il existerait des points avec les mêmes coordonnées.
-  /*for(var d in data)
-  {
-      console.log(d);
-     data[d]["lat"]=(parseFloat(data[d]["lat"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
-     data[d]["long"]=(parseFloat(data[d]["long"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
-      console.log(data[d]);
-  }*/
-
-  var overlay = new google.maps.OverlayView();
-
-
-  // Add the container when the overlay is added to the map.
-  overlay.onAdd = function() {
-    var layer = d3.select(this.getPanes().overlayLayer).append("div")
-        .attr("class", "stations");
-      console.log(data);
-
-    // Draw each marker as a separate SVG element.
-    // We could use a single SVG, but what size would it have?
-    overlay.draw = function() {
-      var projection = this.getProjection(),
-          padding = 10;
-
-      var marker = layer.selectAll("svg")
-          .data(d3.entries(data))
-          .each(transform) // update existing markers
-        .enter().append("svg:svg")
-          .each(transform)
-          .attr("class", "marker");
-
-      // Add a circle.
-      marker.append("svg:circle")
-          .attr("r", 4.5)
-          .attr("cx", padding)
-          .attr("cy", padding);
-
-      // Add a label.
-      marker.append("svg:text") 
-          .attr("x", padding + 7)
-          .attr("y", padding)
-          .attr("dy", ".31em")
-          .text(function(d) { return d.value["title"]; });
-
-      function transform(d) {
-        d = new google.maps.LatLng(d.value["lat"], d.value["long"]);
-        //d = new google.maps.LatLng(d.value["lat"]+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.1), d.value["long"]);
-        //d = new google.maps.LatLng(d.value["lat"]+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.01), d.value["long"]+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.001));
-        d = projection.fromLatLngToDivPixel(d);
-        return d3.select(this)
-            .style("left", (d.x - padding) + "px")
-            .style("top", (d.y - padding) + "px");
-      }
-    };
-  };
-
-  // Bind our overlay to the map…
-  overlay.setMap(map);
-    console.log("OUIIIII");
-});
 });
 
 
@@ -180,3 +106,74 @@ $(".left").click(function(){
 });
 
 
+
+FYJApp.controller("StatsCompanyController", function($scope){
+
+	var margin = {top: 20, right: 20, bottom: 150, left: 40},
+	    width = 960 - margin.left - margin.right,
+	    height = 500 - margin.top - margin.bottom;
+
+	var x = d3.scale.ordinal()
+	    .rangeRoundBands([0, width], .1);
+
+	var y = d3.scale.linear()
+	    .range([height, 0]);
+
+	var xAxis = d3.svg.axis()
+	    .scale(x)
+	    .orient("bottom");
+
+	var yAxis = d3.svg.axis()
+	    .scale(y)
+	    .orient("left")
+	    .ticks(10);
+
+	var svg = d3.select("body").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	d3.xhr("http://trendyjobs.fr/backend/getJobAdverts/80", function(data) {
+
+	  data=JSON.parse(data["response"]);
+
+	  data.sort(function(a,b) {return parseInt(a.id)-parseInt(b.id);});
+
+	  x.domain(data.map(function(d) { return d.company; }));
+	  y.domain([0, d3.max(data, function(d) { console.log(d.company+" "+d.id);return parseInt(d.id); })]);
+	  //console.log(d3.max(data, function(d) { return parseInt(d.id); }));
+
+	  svg.append("g")
+	      .attr("class", "x axis")
+	      .attr("transform", "translate(0," + height + ")")
+	      .call(xAxis)
+	      .selectAll("text")  
+	          .style("text-anchor", "end")
+	          .attr("dx", "-.8em")
+	          .attr("dy", ".15em")
+	          .attr("transform", function(d) {
+	              return "rotate(-65)" 
+	              });
+
+	  svg.append("g")
+	      .attr("class", "y axis")
+	      .call(yAxis)
+	    .append("text")
+	      .attr("transform", "rotate(-90)")
+	      .attr("y", 6)
+	      .attr("dy", ".71em")
+	      .style("text-anchor", "end")
+	      .text("id");
+
+	  svg.selectAll(".bar")
+	      .data(data)
+	    .enter().append("rect")
+	      .attr("class", "bar")
+	      .attr("x", function(d) { return x(d.company); })
+	      .attr("width", x.rangeBand())
+	      .attr("y", function(d) { return y(d.id); })
+	      .attr("height", function(d) { return height - y(d.id); });
+
+	});
+});
