@@ -34,7 +34,8 @@ D3.update = function(){
 
 	enode.append("circle")
 		.attr("fill",function(d){ return d.nodeType==="entreprise" ? '#AAC' : '#ACA'})
-		.attr("r", function(d){ return radiusScale(d.wage); });
+		.attr("r", function(d){ if(d.nodeType == "job") { return radiusScale(d.wage); }
+								else{ if(d.nodeType == "company") { return d.numberOfEdges; }}});
 
 	enode.append("text")
 		.attr("dx", 12)
@@ -158,7 +159,18 @@ D3.printGraph = function(){
 							var gm = GraphManager.getInstance();
 
 							D3.nodes = gm.getNodes();
+							console.log(gm.getEdges());
+							$.each( gm.getEdges(), function(k,v){
+								if(v.source.nodeType == v.target.nodeType){
+									console.log("TAMERLAPUTE meme node type");
+								}
+							});
 							D3.edges = gm.getEdges();
+							$.each(D3.edges,function(k,v){
+								if(v.source.nodeType == v.target.nodeType){
+									console.log("TAMERLAPUTE meme node type");
+								}
+							});
 							nodes = D3.nodes;
 							edges = D3.edges;
 

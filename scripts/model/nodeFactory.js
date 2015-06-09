@@ -14,6 +14,7 @@ if(typeof TrendyJob.Model == "undefined"){
 
 TrendyJob.Model.NodeFactory = (function (){
     var instance;
+    var nodeIDs = {};
 
     function NodeFactoryp(){
     }
@@ -27,8 +28,17 @@ TrendyJob.Model.NodeFactory = (function (){
             }
             return jobOject;
         },
-        getEdge: function(nodeObject, edgeType){
-            return {'source' : nodeObject.title, 'target' : nodeObject.edgeType};
+        getEdge: function(nodeObject, otherNode){
+            return {'source' : {"id" : nodeObject.id, "type" : nodeObject.nodeType}, 'target' : {"id" : otherNode.id, "type" : otherNode.nodeType}};
+        },
+        getNode : function(jobObject,outNodeType){
+            if(typeof nodeIDs[outNodeType] == "undefined"){
+                nodeIDs[outNodeType]=0;
+            }
+            var outNode = {"title" : jobObject[outNodeType],"id" : nodeIDs[outNodeType]};
+            outNode.nodeType = outNodeType;
+            nodeIDs[outNodeType]++;
+            return outNode;
         }
     }
 

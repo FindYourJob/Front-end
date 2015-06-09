@@ -31,9 +31,9 @@ FYJApp.config(['$routeProvider',
 FYJApp.controller("GraphesJCController", function($scope){
 	$.ajax( {
 		type: "GET",
-		//url: "http://www.trendyjobs.fr/backend/getJobAdverts/100",
+		url: "http://www.trendyjobs.fr/backend/getJobAdverts/100",
 		//TODO replace with trendyjobs adress
-		url: "jobs.json",
+		//url: "jobs.json",
 		dataType: "json",
 		success: function(jobList){
 			$.getScript('scripts/informations.js', function() {
@@ -45,8 +45,13 @@ FYJApp.controller("GraphesJCController", function($scope){
 								TrendyJob.Filters.fillFilters(jobList[i]);
 								var gm = GraphManager.getInstance();
 								gm.addNode(jobList[i]);
-								var e = TrendyJob.Model.NodeFactory.getInstance().getEdge(jobList[i], 'company');
-								//gm.addEdge(e);
+                                var cn = gm.findNodeByTitle(jobList[i]['company'],'company');
+                                if(cn == null) {
+                                    cn = TrendyJob.Model.NodeFactory.getInstance().getNode(jobList[i], 'company');
+                                    gm.addNode(cn);
+                                }
+								var e = TrendyJob.Model.NodeFactory.getInstance().getEdge(jobList[i], cn);
+								gm.addEdge(e);
 							}
 							$.getScript('scripts/d3modules/graph.js', function () {
 								D3.printGraph();
@@ -94,20 +99,25 @@ var map = new google.maps.Map(d3.select("#map").node(), {
 //d3.json("jobsWithLatLong.json", function(data) {
 d3.xhr("http://trendyjobs.fr/backend/getJobAdvertsLocated/20", function(data) {
   data=JSON.parse(data["response"]);
+    console.log(data);
 
   //Mise à jour des coordonnées pour introduire un peu de flou au cas où il existerait des points avec les mêmes coordonnées.
-  for(var d in data)
+  /*for(var d in data)
   {
+      console.log(d);
      data[d]["lat"]=(parseFloat(data[d]["lat"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
      data[d]["long"]=(parseFloat(data[d]["long"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
-  }
+      console.log(data[d]);
+  }*/
 
   var overlay = new google.maps.OverlayView();
+
 
   // Add the container when the overlay is added to the map.
   overlay.onAdd = function() {
     var layer = d3.select(this.getPanes().overlayLayer).append("div")
         .attr("class", "stations");
+      console.log(data);
 
     // Draw each marker as a separate SVG element.
     // We could use a single SVG, but what size would it have?
@@ -149,6 +159,7 @@ d3.xhr("http://trendyjobs.fr/backend/getJobAdvertsLocated/20", function(data) {
 
   // Bind our overlay to the map…
   overlay.setMap(map);
+    console.log("OUIIIII");
 });
 });
 

@@ -2,8 +2,9 @@ GraphManager = (function (){
 	var instance;
 
 	function GraphManagerp(){
-		//TODO ajouter une current nodesList
-		this.nodes = {};
+		//TODO ajouter une current internalNodesList
+		this.internalNodes = {};
+		this.nodes = [];
 		this.edges = [];
 		hasChanged = false;
 		this.mapPos=0;
@@ -13,8 +14,8 @@ GraphManager = (function (){
 	GraphManagerp.prototype = {
 		constructor:GraphManagerp,
 		printNodes:function (){
-			console.log(this.nodes);
-				$.each(this.nodes,function(index,value){
+			console.log(this.internalNodes);
+				$.each(this.internalNodes,function(index,value){
 					console.log(index);
 					console.log(value);
 					if(index==="job")
@@ -27,20 +28,23 @@ GraphManager = (function (){
 			console.log(this.edges);
 		},
 		addNode:function (node){
-			if(typeof this.nodes[node.nodeType] === 'undefined'){
-				this.nodes[node.nodeType]={};
+			if(typeof this.internalNodes[node.nodeType] === 'undefined'){
+				this.internalNodes[node.nodeType]={};
 			}
-			this.nodes[node.nodeType][node.id]=jQuery.extend(true, {}, node);
-			this.nodes[node.nodeType][node.id].mapPos=this.mapPos;
-			this.mapPos++;
-			this.hasChanged = true;
+			console.log(this.findNodeByTitle(node.title,node.nodeType));
+			if(this.findNodeByTitle(node.title,node.nodeType) == null) {
+				this.internalNodes[node.nodeType][node.id] = jQuery.extend(true, {}, node);
+				this.internalNodes[node.nodeType][node.id].mapPos = this.mapPos;
+				this.internalNodes[node.nodeType][node.id].numberOfEdges = 0;
+				this.nodes[this.mapPos] = this.internalNodes[node.nodeType][node.id];
+				this.mapPos++;
+				this.hasChanged = true;
+				console.log("ADDING " + node.title);
+			}
 		},
-		findNode:function(nodeId){
-			var type;
-			for(type in this.nodes){
-				if(typeof this.nodes[type][nodeId] !== 'undefined'){
-					return this.nodes[type][nodeId];
-				}
+		findNode:function(nodeId,type){
+			if(typeof this.internalNodes[type][nodeId] !== 'undefined'){
+				return this.internalNodes[type][nodeId];
 			}
 			return null;
 		},
@@ -50,11 +54,17 @@ GraphManager = (function (){
 			retArray=[];
 			
 			for(i=0;i<stArray.length;++i){
-				retArray[i] = this.findNode(stArray[i]);
+				console.log(stArray[i]);
+				retArray[i] = this.findNode(stArray[i].id,stArray[i].type);
         			if(typeof retArray[i] !== 'undefined'){
         				retArray[i].numberOfEdges++;
         			}
         		}
+				if(retArray[0].nodeType == retArray[1].nodeType) {
+					console.log("Adding edge s : " + retArray[0].title + " type " + retArray[0].nodeType + " t : " + retArray[1].title + " type " + retArray[1].nodeType);
+				}
+			console.log(retArray[0]);
+			console.log(retArray[1]);
         		this.edges.push({'source':retArray[0].mapPos,'target':retArray[1].mapPos});
 			this.hasChanged = true;
 		},
@@ -62,7 +72,7 @@ GraphManager = (function (){
 		},
 		getEdgesNumberMap:function(type){
 			map=[];
-			$.each(this.nodes,function(index,value){
+			$.each(this.internalNodes,function(index,value){
 				if(index===type || typeof(type)==='undefined')
 						$.each(value,function(index,node){
 							map.push([index,node.numberOfEdges]);
@@ -70,15 +80,8 @@ GraphManager = (function (){
 				});
 				return map;
 		},
-		getNodes:function(type){
-			map=[];
-			$.each(this.nodes,function(index,value){
-				if(index===type || typeof(type)==='undefined')
-						$.each(value,function(index,node){
-							map.push(node);
-						});
-				});
-				return map;
+		getNodes:function(){
+			return this.nodes;
 		},
 		getEdges:function(){
 			return this.edges;
@@ -91,14 +94,23 @@ GraphManager = (function (){
 		//FIXME nodeByTitle peut renvoyer plusieurs noeuds => pas bien et pas prévu. En plus devrait p-ê prendre le type en arg
 		findNodeByTitle:function(title){
 			var type;
-			for(type in this.nodes){
-				for(nid in this.nodes[type]){
-					node=this.nodes[type][nid];
+			for(type in this.internalNodes){
+				for(nid in this.internalNodes[type]){
+					node=this.internalNodes[type][nid];
 					if(node.title===title){
 						return node;
 					}
 				}
 			}
+			return null;
+		},
+		findNodeByTitle:function(title,type){
+				for(nid in this.internalNodes[type]){
+					node=this.internalNodes[type][nid];
+					if(node.title===title){
+						return node;
+					}
+				}
 			return null;
 		}
 	}

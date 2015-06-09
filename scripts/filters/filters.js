@@ -138,7 +138,7 @@ TrendyJob.Filters = {
         for(var i=0;i<nodeTypes.length;++i){
             nodeFilters = TrendyJob.Filters.NodeFilters[nodeTypes[i]];
             for (var key in nodeFilters.filtersType) {
-                if (filtersType.hasOwnProperty(key)) {
+                if (nodeFilters.filtersType.hasOwnProperty(key)) {
                     TrendyJob.Filters.generateFilter(nodeFilters,key, nodeTypes[i], filterBody, scope);
                 }
             }

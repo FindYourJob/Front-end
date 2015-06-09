@@ -40,6 +40,10 @@ TrendyJob.Informations = {
             type : {
                 display : "Type",
                 displaytype : "shorttext"
+            },
+            company : {
+                display : "Entreprise",
+                displaytype : "shorttext"
             }
         }
     },
