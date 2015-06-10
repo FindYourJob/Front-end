@@ -31,15 +31,13 @@ GraphManager = (function (){
 			if(typeof this.internalNodes[node.nodeType] === 'undefined'){
 				this.internalNodes[node.nodeType]={};
 			}
-			console.log(this.findNodeByTitle(node.title,node.nodeType));
-			if(this.findNodeByTitle(node.title,node.nodeType) == null) {
+			if(this.findNodeByTitle(node.title,node.nodeType) == null || node.nodeType == "job") {
 				this.internalNodes[node.nodeType][node.id] = jQuery.extend(true, {}, node);
 				this.internalNodes[node.nodeType][node.id].mapPos = this.mapPos;
 				this.internalNodes[node.nodeType][node.id].numberOfEdges = 0;
 				this.nodes[this.mapPos] = this.internalNodes[node.nodeType][node.id];
 				this.mapPos++;
 				this.hasChanged = true;
-				console.log("ADDING " + node.title);
 			}
 		},
 		findNode:function(nodeId,type){
@@ -52,20 +50,14 @@ GraphManager = (function (){
 			var i, stArray,retArray,edge;
 			stArray = [edge.source,edge.target];
 			retArray=[];
-			
+
 			for(i=0;i<stArray.length;++i){
-				console.log(stArray[i]);
 				retArray[i] = this.findNode(stArray[i].id,stArray[i].type);
         			if(typeof retArray[i] !== 'undefined'){
         				retArray[i].numberOfEdges++;
         			}
         		}
-				if(retArray[0].nodeType == retArray[1].nodeType) {
-					console.log("Adding edge s : " + retArray[0].title + " type " + retArray[0].nodeType + " t : " + retArray[1].title + " type " + retArray[1].nodeType);
-				}
-			console.log(retArray[0]);
-			console.log(retArray[1]);
-        		this.edges.push({'source':retArray[0].mapPos,'target':retArray[1].mapPos});
+        		this.edges.push({'source':retArray[0],'target':retArray[1]});
 			this.hasChanged = true;
 		},
 		refreshInformation:function(){
@@ -83,8 +75,39 @@ GraphManager = (function (){
 		getNodes:function(){
 			return this.nodes;
 		},
+		getNodesByType:function(nodeType){
+			var map = [];
+			$.each(this.internalNodes[nodeType],function(i,node){
+				map.push(node);
+			});
+			return map;
+		},
 		getEdges:function(){
 			return this.edges;
+		},
+		getUpdatedEdges:function(newNodes){
+			var retEdges = [];
+			var j, i;
+			$.each(this.edges,function(j,e){
+				var sourcePos = -1;
+				var targetPos = -1;
+				$.each(newNodes, function(i,n){
+					/*if(j==0){
+						n.mapPos = i;
+					}*/
+					if(e.target.id == n.id && e.target.nodeType == n.nodeType){
+						targetPos = i;
+					} else if(e.source.id == n.id && e.source.nodeType == n.nodeType){
+						sourcePos = i;
+					}
+				});
+
+				if(sourcePos != -1 && targetPos != -1){
+					console.log({source: newNodes[sourcePos],target : newNodes[targetPos]});
+					retEdges.push({source: newNodes[sourcePos],target : newNodes[targetPos]});
+				}
+			});
+			return retEdges;
 		},
 		//TODO FIXME LOL Jean ne sait pas à quoi sert ceci alors qu'il l'a codé.
 		getNAID:function(){
@@ -112,6 +135,17 @@ GraphManager = (function (){
 					}
 				}
 			return null;
+		},
+		compareNodes : function(n1,n2){
+				return n1.mapPos == n2.mapPos;
+		},
+		nodeArrayContains: function(arr,n){
+			$.each(arr,function(k,n2){
+				if(GraphManager.getInstance().compareNodes(n,n2)){
+					return true;
+				}
+			});
+			return false;
 		}
 	}
 

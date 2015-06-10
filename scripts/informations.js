@@ -16,7 +16,8 @@ TrendyJob.Informations = {
     InformationType : {
         "longtext" : "<div class=\"panel panel-default\"> <div class=\"panel-heading\"> PROPDISPLAY : </div> <div class=\"panel-body longtext\"> VALUE </div> </div>",
         "numeric" : "<div class=\"numeric\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>",
-        "shorttext" : "<div class=\"shorttext\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>"
+        "shorttext" : "<div class=\"shorttext\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>",
+        "list" : "<div class=\"shorttext\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>"
     },
     ByNode : {
         job : {
@@ -44,6 +45,25 @@ TrendyJob.Informations = {
             company : {
                 display : "Entreprise",
                 displaytype : "shorttext"
+            },
+            date : {
+                display : "Date de publication",
+                displaytype : "shorttext"
+            },
+            technos : {
+                display : "Technologies",
+                displayType : "list"
+            }
+        },
+        company : {
+            display : "Entreprise",
+            title : {
+                display : "Nom",
+                displaytype : "shorttext"
+            },
+            numberOfEdges : {
+                display : "Nombre d'annonces",
+                displaytype : "numeric"
             }
         }
     },
@@ -58,12 +78,12 @@ TrendyJob.Informations = {
         return htmlres;
     },
     generateNodeAttribute : function(propname, propattrs, propvalue){
-        console.log(TrendyJob.Informations);
-        console.log(propattrs["displaytype"]);
-        console.log(TrendyJob.Informations.InformationType[propattrs["displaytype"]]);
         var html = TrendyJob.Informations.InformationType[propattrs["displaytype"]];
         html = html.replace(/PROPDISPLAY/g,propattrs["display"]);
         html = html.replace(/VALUE/g,propvalue);
         return html;
+    },
+    generateNodeTitle: function(node){
+        return "Informations " + TrendyJob.Informations.ByNode[node.nodeType]["display"];
     }
 }

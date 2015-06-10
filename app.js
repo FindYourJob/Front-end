@@ -33,4 +33,3 @@ angular.module('FYJApp', ['ngRoute', 'app.controllers'])
 	redirectTo: '/Accueil'
       });
 }]);
-

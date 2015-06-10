@@ -5,6 +5,31 @@ if(typeof D3 == "undefined"){
 D3.nodes = [];
 D3.edges = [];
 D3.force = {};
+D3.radius = {};
+D3.colors = {};
+
+D3.generateColours = function(n){
+	var gColors = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+	var basicColors = gColors.map(function(n){return d3.rgb(n);});
+	var nbColors = basicColors.length;
+	if(n<nbColors){
+		basicColors = basicColors.splice(0,n);
+	} else {
+		var lighter = true;
+		for(var i = nbColors;i<=n;++i){
+			if(i%nbColors == 0){
+				lighter = !lighter;
+			}
+			if(lighter){
+				basicColors.push(basicColors[i-nbColors].brighter(.5));
+			} else {
+				basicColors.push(basicColors[i-nbColors].darker(.5));
+			}
+		}
+	}
+	return basicColors;
+}
+
 D3.update = function(){
 	var drag = d3.behavior.drag()
 		.origin(function(d) { return d; })
@@ -12,51 +37,87 @@ D3.update = function(){
 		.on("drag", dragged)
 		.on("dragend", dragended);
 
-	var radiusScale = d3.scale.linear()
-		.domain([0, d3.max(nodes,function(n){ return n.wage; })])
-		.range([6,30]);
-
-
+	//TODO add type of nodes considered
+	$.each(["job","company"],function(i,nodeType){
+		D3.radius[nodeType] = d3.scale.linear()
+			.domain([0, d3.max(GraphManager.getInstance().getNodesByType(nodeType),function(n){ return TrendyJob.Settings.getActualParamater(n,"size"); })])
+			.range([6,30]);
+		var tmpArray = GraphManager.getInstance().getNodesByType(nodeType).map(function(n){ return TrendyJob.Settings.getActualParamater(n,"color")});
+		tmpArray = $.grep(tmpArray, function(el, index){
+			return index == $.inArray(el, tmpArray);
+		});
+		D3.colors[nodeType] = d3.scale.ordinal()
+			.domain(tmpArray)
+			.range(D3.generateColours(tmpArray.length));
+	});
 
 	var link = D3.container.selectAll(".link")
-		.data(edges)
-		.enter().append("line")
+		.data(D3.edges);
+
+
+
+	link.enter().append("line")
 		.attr("class", "link");
 
+	link.exit().remove();
+
+
+
 	var node = D3.container.selectAll(".node")
-		.data(D3.nodes);
+		.data(D3.nodes,function(d){
+			return d.mapPos;
+		});
 
 	node.exit().remove();
+
+	//To keep nodes on top of links
+	$(".node").each(function(index){
+		this.parentNode.appendChild(this);
+	});
 
 	var enode = node.enter().append("g")
 		.attr("class", "node")
 		.call(drag);
 
-	enode.append("circle")
-		.attr("fill",function(d){ return d.nodeType==="entreprise" ? '#AAC' : '#ACA'})
-		.attr("r", function(d){ if(d.nodeType == "job") { return radiusScale(d.wage); }
-								else{ if(d.nodeType == "company") { return d.numberOfEdges; }}});
+	enode.append("circle");
+
+	node.selectAll("circle").attr("fill",function(d){ return D3.colors[d.nodeType](TrendyJob.Settings.getActualParamater(d,"color"))})
+		.attr("r", function(d){ return D3.radius[d.nodeType](TrendyJob.Settings.getActualParamater(d,"size")); });
 
 	enode.append("text")
 		.attr("dx", 12)
-		.attr("dy", ".35em")
+		.attr("dy", ".35em");
+
+	node.selectAll("text")
 		.text(function(d) { return d.title });
 
 	enode.on("click",function(d){
-		$("#nodeMenu * .panel-title a").empty();
-		$("#nodeMenu * .panel-title a").append("Informations " + d.nodeType.charAt(0).toUpperCase() + d.nodeType.slice(1));
-		$("#nodeMenu * .panel-body").empty();
-		$("#nodeMenu").width($("svg").width() * 20 / 100)
-		$("#nodeMenu * .panel-body").append(TrendyJob.Informations.generateNodeInfo(d));
-		$("#nodeMenu").css("left", $("svg").width() - $("#nodeMenu").width() - 35 + "px");
-		$("#nodeMenu").show("fast");
-		$("#closeNode").click(function(){
-			console.log("clicked");
-			$("#nodeMenu").hide("fast");
-		})
-	});
+		console.log(d);
+			$("#nodeMenu * .panel-title a").empty();
+			$("#nodeMenu * .panel-title a").append(TrendyJob.Informations.generateNodeTitle(d));
+			$("#nodeMenu * .panel-body").empty();
+			$("#nodeMenu").width($("svg").width() * 20 / 100)
+			$("#nodeMenu * .panel-body").append(TrendyJob.Informations.generateNodeInfo(d));
+			$("#nodeMenu").css("left", $("svg").width() - $("#nodeMenu").width() - 35 + "px");
+			$("#nodeMenu").show("fast");
+			$("#closeNode").click(function(){
+				$("#nodeMenu").hide("fast");
+			});
+		});
+
+
 	var i=0;
+
+	D3.force.gravity(.05)
+		.charge(-300)
+		.size([D3.w, D3.h])
+		.linkDistance(100)
+		/*.nodes(D3.nodes)
+		.links(D3.edges)*/
+		.start();
+
 	D3.force.on("tick", function() {
+		node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 		link.attr("x1", function(d) { /*if(d.source.numberOfEdges>d.target.numberOfEdges){
 		 if(d.source.x<d.target.x){
 		 d.target.x--;
@@ -89,7 +150,7 @@ D3.update = function(){
 				return d.source.y; })
 			.attr("x2", function(d) { return d.target.x; })
 			.attr("y2", function(d) { return d.target.y; });
-		node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
 	});
 
 	function dragstarted(d) {
@@ -107,13 +168,6 @@ D3.update = function(){
 	}
 
 
-	D3.force.gravity(.05)
-		.charge(-300)
-		.size([D3.w, D3.h])
-		.linkDistance(100)
-		.nodes(nodes)
-		.links(edges)
-		.start();
 
 }
 D3.printGraph = function(){
@@ -158,23 +212,23 @@ D3.printGraph = function(){
 
 							var gm = GraphManager.getInstance();
 
-							D3.nodes = gm.getNodes();
-							console.log(gm.getEdges());
-							$.each( gm.getEdges(), function(k,v){
-								if(v.source.nodeType == v.target.nodeType){
-									console.log("TAMERLAPUTE meme node type");
-								}
-							});
-							D3.edges = gm.getEdges();
-							$.each(D3.edges,function(k,v){
-								if(v.source.nodeType == v.target.nodeType){
-									console.log("TAMERLAPUTE meme node type");
-								}
-							});
-							nodes = D3.nodes;
-							edges = D3.edges;
+
 
 							D3.force = d3.layout.force();
+
+
+							D3.nodes = D3.force.nodes();
+							D3.edges = D3.force.links();
+
+							$.each(gm.getNodes(),function(k,n){
+								D3.nodes.push(n);
+								n = D3.nodes[k];
+							});
+
+							$.each(gm.getEdges(),function(k,e){
+								D3.edges.push(e);
+								e = D3.edges[k];
+							});
 
 							D3.update();
 						    //force.start(10,15,20);

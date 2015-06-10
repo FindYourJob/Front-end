@@ -18,25 +18,28 @@ angular.module('app.controllers', ['isteven-multi-select'])
             success: function(jobList){
                 $.getScript('scripts/informations.js', function() {
                     $.getScript('scripts/filters/filters.js', function () {
-                        $.getScript('scripts/graphManager.js', function () {
-                            $.getScript('scripts/Model/nodeFactory.js', function () {
-                                for (i = 0; i < jobList.length; ++i) {
-                                    jobList[i].nodeType = 'job';
-                                    TrendyJob.Filters.fillFilters(jobList[i]);
-                                    var gm = GraphManager.getInstance();
-                                    gm.addNode(jobList[i]);
-                                    var cn = gm.findNodeByTitle(jobList[i]['company'],'company');
-                                    if(cn == null) {
-                                        cn = TrendyJob.Model.NodeFactory.getInstance().getNode(jobList[i], 'company');
-                                        gm.addNode(cn);
+                        $.getScript('scripts/settings.js', function () {
+                            $.getScript('scripts/graphManager.js', function () {
+                                $.getScript('scripts/Model/nodeFactory.js', function () {
+                                    for (i = 0; i < jobList.length; ++i) {
+                                        jobList[i].nodeType = 'job';
+                                        TrendyJob.Filters.fillFilters(jobList[i]);
+                                        var gm = GraphManager.getInstance();
+                                        gm.addNode(jobList[i]);
+                                        var cn = gm.findNodeByTitle(jobList[i]['company'],'company');
+                                        if(cn == null) {
+                                            cn = TrendyJob.Model.NodeFactory.getInstance().getNode(jobList[i], 'company');
+                                            gm.addNode(cn);
+                                        }
+                                        var e = TrendyJob.Model.NodeFactory.getInstance().getEdge(jobList[i], cn);
+                                        gm.addEdge(e);
                                     }
-                                    var e = TrendyJob.Model.NodeFactory.getInstance().getEdge(jobList[i], cn);
-                                    gm.addEdge(e);
-                                }
-                                $.getScript('scripts/d3modules/graph.js', function () {
-                                    D3.printGraph();
+                                    $.getScript('scripts/d3modules/graph.js', function () {
+                                        D3.printGraph();
+                                    });
+                                    TrendyJob.Filters.createPageFilters(["job"], $scope);
+                                    TrendyJob.Settings.createPageSettings(["job","company"]);
                                 });
-                                TrendyJob.Filters.createPageFilters(["job"], $scope);
                             });
                         });
                     });

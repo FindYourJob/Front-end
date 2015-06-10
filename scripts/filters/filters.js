@@ -134,7 +134,7 @@ TrendyJob.Filters = {
         }
     },
     createPageFilters: function(nodeTypes, scope){
-        var filterBody = $("#left-menu1 .panel-body");
+        var filterBody = $("#left-menu1 #collapseOne .panel-body");
         for(var i=0;i<nodeTypes.length;++i){
             nodeFilters = TrendyJob.Filters.NodeFilters[nodeTypes[i]];
             for (var key in nodeFilters.filtersType) {
@@ -202,13 +202,10 @@ TrendyJob.Filters = {
             filterBody.append(displayContent);
             $.each(["under","over"], function(n,type){
                 var previous;
-                console.log(type);
                 $("#" + key + "-filter-numeric-" + type).focus(function(){
                     previous = $(this).val();
-                    console.log(previous);
                 }).change(function(){
                     var valName = $(this).attr("id").split("-")[0];
-                    console.log(previous);
                     if(!$.isNumeric($(this).val())){
                         $(this).val(previous);
                     }
@@ -236,15 +233,29 @@ TrendyJob.Filters = {
         }
     },
     refreshNodeList: function(nodeFilters,nodeType){
-        D3.nodes = GraphManager.getInstance().getNodes(nodeType);
+        var allNodes = GraphManager.getInstance().getNodesByType(nodeType);
+        D3.edges = GraphManager.getInstance().getEdges();
         $.each(nodeFilters.activeFilterList, function(key,list){
             //intersect arrays
-            console.log(list);
-            D3.nodes = $.grep(D3.nodes, function(v){
+            allNodes = $.grep(allNodes, function(v){
                return $.inArray(v,list) != -1;
             });
         });
-        //TrendyJob.Filters.refreshFilters(D3.nodes,nodeType);
+        var removeIndexes = [];
+        $.each(D3.nodes,function(k,node){
+            if(node.nodeType == nodeType && !GraphManager.getInstance().nodeArrayContains(allNodes,node)){
+                removeIndexes.push(k);
+            }
+        });
+        $.each(removeIndexes,function(i,k){
+            D3.nodes.splice(k-i,1);
+        });
+        $.each(allNodes,function(k,node){
+           if(!D3.nodes.indexOf(node) != -1){
+               D3.nodes.push(node);
+           }
+        });
+        D3.edges = GraphManager.getInstance().getUpdatedEdges(D3.nodes);
         D3.update();
     }
 };
