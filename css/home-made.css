@@ -67,7 +67,7 @@
   }
 
 
-# Graphiques - Bar chart
+/* Graphiques - Bar chart */
 
 .bar {
   fill: steelblue;
@@ -90,4 +90,8 @@
 
 .x.axis path {
   display: none;
+}
+
+.text-center{
+    text-align: center;
 }
