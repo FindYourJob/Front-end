@@ -17,7 +17,7 @@ TrendyJob.Informations = {
         "longtext" : "<div class=\"panel panel-default\"> <div class=\"panel-heading\"> PROPDISPLAY : </div> <div class=\"panel-body longtext\"> VALUE </div> </div>",
         "numeric" : "<div class=\"numeric\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>",
         "shorttext" : "<div class=\"shorttext\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>",
-        "list" : "<div class=\"shorttext\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>"
+        "list" : "<div class=\"trendyJob-list\"> PROPDISPLAY : <ul> VALUE  </ul> </div>"
     },
     ByNode : {
         job : {
@@ -52,7 +52,7 @@ TrendyJob.Informations = {
             },
             technos : {
                 display : "Technologies",
-                displayType : "list"
+                displaytype : "list"
             }
         },
         company : {
@@ -80,6 +80,19 @@ TrendyJob.Informations = {
     generateNodeAttribute : function(propname, propattrs, propvalue){
         var html = TrendyJob.Informations.InformationType[propattrs["displaytype"]];
         html = html.replace(/PROPDISPLAY/g,propattrs["display"]);
+        if(propattrs["displaytype"] == "list"){
+            var htmlValue = "";
+            console.log(propvalue);
+            if(typeof propvalue == "string"){
+                propvalue = $.parseJSON(propvalue);
+            }
+            $.each(propvalue,function(i,el){
+                //accessing techno name
+                console.log(el);
+                htmlValue += "<li>" + el + "</li>";
+            });
+            propvalue = htmlValue;
+        }
         html = html.replace(/VALUE/g,propvalue);
         return html;
     },
