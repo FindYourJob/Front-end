@@ -1,8 +1,38 @@
-	<style>
+<script src="scripts/d3.tip.v0.6.3.js"></script>
+<style>
 			#test {
   overflow:auto;
 }
-		</style>
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+</style>
 
 <script type="text/javascript">
 
@@ -26,15 +56,26 @@
 	    .orient("left")
 	    .ticks(10);
 
+	    
+
+    var tip = d3.tip()
+	    .attr('class', 'd3-tip')
+	    .offset([-10, 0])
+	    .html(function(d) {
+	      return "<strong>"+d[Object.keys(d)[0]]+" : </strong> <span style='color:red'>" + d[Object.keys(d)[1]]  + "</span>";
+	    })
+
 	var svg1 = d3.select("#GraphiqueContainer1").append("svg")
 	    .attr("width", width + margin.left + margin.right)
 	    .attr("height", height + margin.top + margin.bottom)
 	  .append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+	svg1.call(tip);
+
 	var color = d3.scale.linear()
     .domain([0, 20])
-    .range(["#FFADAD", "red"]);
+    .range(["#99CCFF", "#0000CC"]);
 	
 
 	var svg2 = d3.select("#GraphiqueContainer2").append("svg")
@@ -55,6 +96,8 @@
 
 	    	x.domain(data.map(function(d) { return d[paramX] }));
 	    	y.domain([0, d3.max(data, function(d) { return parseInt(d[paramY]); })]);
+
+	    	document.getElementById("CompanyNameMax").innerHTML = "L'entreprise <strong>"+ data[data.length-1].company +"</strong> est l'entreprise proposant le plus d'offres avec <strong>"+ data[data.length-1].nbAdverts +"</strong> annonces actuellement";
 
 	    	svg.selectAll(".bar").remove();
 			svg.selectAll(".axis").remove();
@@ -90,13 +133,20 @@
 	    	.attr("width", x.rangeBand())
 	    	.attr("y", function(d) { return y(d[paramY]); })
 	    	.attr("height", function(d) { return height - y(d[paramY]); })
+	    	.on('mouseover', tip.show)
+      		.on('mouseout', tip.hide)
 	    	.on("click", function(d){
-	    		if(d.company != undefined)
+	    		if(d.company != undefined){
 	    			update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+d.company+"/10",x,y,svg2,"name","nbAdverts");
+	    			document.getElementById("CompanyName").innerHTML = "Entreprise : "+ d.company;
+	    			document.getElementById("NbTotal").innerHTML = "Nombre d'annonces total : "+ d.nbAdverts;
+
+	    		}
+
 	    	});
 
 
-	    	var select = document.getElementsByClassName("selectpicker")[0]; 
+	    	/*var select = document.getElementsByClassName("selectpicker")[0]; 
 	    	console.log(data);
 	    	for (var i=0; i<data.length; i++)
 	    	{
@@ -105,7 +155,7 @@
 	    		el.textContent = opt;
 	    		el.value = opt;
 	    		select.appendChild(el);
-	    	}
+	    	}*/
 
 	    });
 	}	
@@ -134,14 +184,21 @@
 		</div>
 		<div class="col-md-4">
 			<h2> Quelques chiffres </h2>
-			<p> Blablabla </p>
+			<h3 id="CompanyNameMax"> </h3>
 		</div>
 	</div>
 <h1> Etude d'une entreprise en particulier </h1>
-    <!-- Select ou clique sur Barchart ou les deux ?
-    <select class="selectpicker"></select>-->
-	<div id="test" class="col-md-8">
-		<div id="GraphiqueContainer2"> </div>
+	<div class="row">
+	    <!-- Select ou clique sur Barchart ou les deux ?
+	    <select class="selectpicker"></select>-->
+		<div id="test" class="col-md-8">
+			<div id="GraphiqueContainer2"> </div>
+		</div>
+		<div class="col-md-4">
+			<h2> Quelques chiffres </h2>
+			<h3 id="CompanyName"> </h3>
+			<h3 id="NbTotal">  </h3>
+		</div>
 	</div>
 </div>
 	
