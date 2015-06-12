@@ -1,8 +1,15 @@
+	<style>
+			#test {
+  overflow:auto;
+}
+		</style>
+
 <script type="text/javascript">
 
+	// Premier graph
 	var margin = {top: 20, right: 20, bottom: 150, left: 40},
 	    width = 960 - margin.left - margin.right,
-	    height = 500 - margin.top - margin.bottom;
+	    height = 400 - margin.top - margin.bottom;
 
 	var x = d3.scale.ordinal()
 	    .rangeRoundBands([0, width], .1);
@@ -19,55 +26,122 @@
 	    .orient("left")
 	    .ticks(10);
 
-	var svg = d3.select("#GraphiqueContainer").append("svg")
+	var svg1 = d3.select("#GraphiqueContainer1").append("svg")
 	    .attr("width", width + margin.left + margin.right)
 	    .attr("height", height + margin.top + margin.bottom)
 	  .append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	d3.xhr("http://trendyjobs.fr/backend/getNbAdvertsByCompany/200	", function(data) {
+	var color = d3.scale.linear()
+    .domain([0, 20])
+    .range(["#FFADAD", "red"]);
+	
 
-	  data=JSON.parse(data["response"]);
-	  console.log(data);
+	var svg2 = d3.select("#GraphiqueContainer2").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	  data.sort(function(a,b) {return parseInt(a.nbAdverts)-parseInt(b.nbAdverts);});
 
-	  x.domain(data.map(function(d) { return d.company; }));
-	  y.domain([0, d3.max(data, function(d) { return parseInt(d.nbAdverts); })]);
+	function update(url,x,y,svg,paramX, paramY) {
 
-	  svg.append("g")
-	      .attr("class", "x axis")
-	      .attr("transform", "translate(0," + height + ")")
-	      .call(xAxis)
-	      .selectAll("text")  
-	          .style("text-anchor", "end")
-	          .attr("dx", "-.8em")
-	          .attr("dy", ".15em")
-	          .attr("transform", function(d) {
-	              return "rotate(-65)" 
-	              });
+	    d3.xhr(url, function(data) {
 
-	  svg.append("g")
-	      .attr("class", "y axis")
-	      .call(yAxis)
-	      .append("text")
-	      .attr("transform", "rotate(-90)")
-	      .attr("y", 6)
-	      .attr("dy", ".71em")
-	      .style("text-anchor", "end")
-	      .text("id");
 
-	  svg.selectAll(".bar")
-	      .data(data)
-	      .enter().append("rect")
-	      .attr("class", "bar")
-	      .attr("x", function(d) { return x(d.company); })
-	      .attr("width", x.rangeBand())
-	      .attr("y", function(d) { return y(d.nbAdverts); })
-	      .attr("height", function(d) { return height - y(d.nbAdverts); });
+	    	data=JSON.parse(data["response"]);
 
-	});
+	    	data.sort(function(a,b) {return parseInt(a[paramY])-parseInt(b[paramY]);});
+
+	    	x.domain(data.map(function(d) { return d[paramX] }));
+	    	y.domain([0, d3.max(data, function(d) { return parseInt(d[paramY]); })]);
+
+	    	svg.selectAll(".bar").remove();
+			svg.selectAll(".axis").remove();
+
+	    	svg.append("g")
+		    	.attr("class", "x axis")
+		    	.attr("transform", "translate(0," + height + ")")
+		    	.call(xAxis)
+		    	.selectAll("text")  
+		    	.style("text-anchor", "end")
+		    	.attr("dx", "-.8em")
+		    	.attr("dy", ".15em")
+		    	.attr("transform", function(d) {
+		    		return "rotate(-65)" 
+		    	});
+
+	    	svg.append("g")
+		    	.attr("class", "y axis")
+		    	.call(yAxis)
+		    	.append("text")
+		    	.attr("transform", "rotate(-90)")
+		    	.attr("y", 6)
+		    	.attr("dy", ".71em")
+		    	.style("text-anchor", "end")
+		    	.text(paramY);
+
+	    	svg.selectAll(".bar")
+	    	.data(data)
+	    	.enter().append("rect")
+	    	.attr("class", "bar")
+	    	.attr("fill", function(d) { return color(d[paramY])})
+	    	.attr("x", function(d) { return x(d[paramX]); })
+	    	.attr("width", x.rangeBand())
+	    	.attr("y", function(d) { return y(d[paramY]); })
+	    	.attr("height", function(d) { return height - y(d[paramY]); })
+	    	.on("click", function(d){
+	    		if(d.company != undefined)
+	    			update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+d.company+"/10",x,y,svg2,"name","nbAdverts");
+	    	});
+
+
+	    	var select = document.getElementsByClassName("selectpicker")[0]; 
+	    	console.log(data);
+	    	for (var i=0; i<data.length; i++)
+	    	{
+	    		var opt = data[i][paramX];
+	    		var el = document.createElement("option");
+	    		el.textContent = opt;
+	    		el.value = opt;
+	    		select.appendChild(el);
+	    	}
+
+	    });
+	}	
+
+	update("http://trendyjobs.fr/backend/getNbAdvertsByCompany/200",x,y,svg1,"company", "nbAdverts")
+
+
+	// Si étude d'une entreprise en particulier ? Select ou click sur bar chat ?
+	/*$('.selectpicker').on('change', function(){
+	var selected = $(this).find("option:selected").val();
+	console.log(selected);
+	update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+selected+"/10",x,y,svg2,"name","nbAdverts");
+
+	});*/
+
+
 
 </script>
 
-<div id="GraphiqueContainer"> </div>
+<div id="AllStatsContainer" class="container"> 
+	<h1> Toutes les entreprises </h1>
+
+	<div class="row">
+		<div id="test" class="col-md-8">
+  			<div id="GraphiqueContainer1"> </div>
+		</div>
+		<div class="col-md-4">
+			<h2> Quelques chiffres </h2>
+			<p> Blablabla </p>
+		</div>
+	</div>
+<h1> Etude d'une entreprise en particulier </h1>
+    <!-- Select ou clique sur Barchart ou les deux ?
+    <select class="selectpicker"></select>-->
+	<div id="test" class="col-md-8">
+		<div id="GraphiqueContainer2"> </div>
+	</div>
+</div>
+	
