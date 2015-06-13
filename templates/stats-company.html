@@ -157,16 +157,17 @@
 
 	    	});
 
+	    	if(data[0].company != undefined){
 
-	    	var select = document.getElementsByClassName("selectpicker")[0]; 
-	    	console.log(data);
-	    	for (var i=0; i<data.length; i++)
-	    	{
-	    		var opt = data[i][paramX];
-	    		var el = document.createElement("option");
-	    		el.textContent = opt;
-	    		el.value = opt;
-	    		select.appendChild(el);
+		    	var select = document.getElementsByClassName("selectpicker")[0]; 
+		    	for (var i=0; i<data.length; i++)
+		    	{
+		    		var opt = data[i][paramX];
+		    		var el = document.createElement("option");
+		    		el.textContent = opt;
+		    		el.value = opt;
+		    		select.appendChild(el);
+		    	}
 	    	}
 
 	    });
