@@ -9,6 +9,7 @@ GraphManager = (function (){
 		hasChanged = false;
 		this.mapPos=0;
 		this.NAID=0;
+		this.nodeTypesArray = [];
 	}
 
 	GraphManagerp.prototype = {
@@ -30,6 +31,7 @@ GraphManager = (function (){
 		addNode:function (node){
 			if(typeof this.internalNodes[node.nodeType] === 'undefined'){
 				this.internalNodes[node.nodeType]={};
+				this.nodeTypesArray.push(node.nodeType);
 			}
 			if(this.findNodeByTitle(node.title,node.nodeType) == null || node.nodeType == "job") {
 				this.internalNodes[node.nodeType][node.id] = jQuery.extend(true, {}, node);
@@ -38,7 +40,12 @@ GraphManager = (function (){
 				this.nodes[this.mapPos] = this.internalNodes[node.nodeType][node.id];
 				this.mapPos++;
 				this.hasChanged = true;
+				return this.internalNodes[node.nodeType][node.id];
 			}
+			return this.findNodeByTitle(node.title,node.nodeType);
+		},
+		getNodeTypes:function(){
+			return this.nodeTypesArray;
 		},
 		findNode:function(nodeId,type){
 			if(typeof this.internalNodes[type][nodeId] !== 'undefined'){
@@ -57,8 +64,25 @@ GraphManager = (function (){
         				retArray[i].numberOfEdges++;
         			}
         		}
-        		this.edges.push({'source':retArray[0],'target':retArray[1]});
-			this.hasChanged = true;
+			edgeExists = false;
+			for(i=0;i<retArray.length;++i){
+				//ADDING LINKED NODE INFORMATIONS TO NODE, no need to go through the edges array then
+				if(typeof retArray[i][retArray[(i+1)%2].nodeType] == "undefined"){
+					retArray[i][retArray[(i+1)%2].nodeType] = [retArray[(i+1)%2]];
+				} else {
+					if($.isArray(retArray[i][retArray[(i+1)%2].nodeType])){
+						if($.inArray(retArray[(i+1)%2],retArray[i][retArray[(i+1)%2].nodeType]) == -1){
+							retArray[i][retArray[(i+1)%2].nodeType].push(retArray[(i+1)%2]);
+						} else {
+							edgeExists = true;
+						}
+					}
+				}
+			}
+			if(!edgeExists){
+				this.edges.push({'source':retArray[0],'target':retArray[1]});
+				this.hasChanged = true;
+			}
 		},
 		refreshInformation:function(){
 		},
@@ -103,7 +127,6 @@ GraphManager = (function (){
 				});
 
 				if(sourcePos != -1 && targetPos != -1){
-					console.log({source: newNodes[sourcePos],target : newNodes[targetPos]});
 					retEdges.push({source: newNodes[sourcePos],target : newNodes[targetPos]});
 				}
 			});
@@ -146,6 +169,94 @@ GraphManager = (function (){
 				}
 			});
 			return false;
+		},
+		generatePage: function(principalNodeType, otherNodeTypes, nodeList, scope){
+			$.getScript('scripts/informations.js', function() {
+				$.getScript('scripts/filters/filters.js', function () {
+					$.getScript('scripts/settings.js', function () {
+							$.getScript('scripts/Model/nodeFactory.js', function () {
+								for (i = 0; i < nodeList.length; ++i) {
+									var gm = GraphManager.getInstance();
+									if(principalNodeType != ""){
+										nodeList[i].nodeType = principalNodeType;
+										TrendyJob.Filters.fillFilters(nodeList[i]);
+										gm.addNode(nodeList[i]);
+									}
+									var nodesToLink = {};
+									$.each(otherNodeTypes, function(useless,oNodeType){
+										var otherNodes = nodeList[i][oNodeType];
+
+										/*
+										if($.isObject(otherNodes)){
+											// On checke si l'objet qu'on nous donne est une map
+											if($.grep(otherNodes.keys(),function(n){ return !$.isNumeric();}).length!=0){
+
+											}
+										}*/
+										if(!$.isArray(otherNodes) && !$.isPlainObject(otherNodes)){
+											otherNodes = [otherNodes];
+										}
+										$.each(otherNodes, function(useless, otherNodeTitle){
+
+											var otherNode = gm.findNodeByTitle(otherNodeTitle,oNodeType);
+											if(otherNode == null) {
+												otherNode = TrendyJob.Model.NodeFactory.getInstance().getNode(otherNodeTitle, oNodeType, nodeList[i], otherNodeTypes);
+												otherNode = gm.addNode(otherNode);
+												TrendyJob.Filters.fillFilters(otherNode);
+											}
+											if($.isArray(nodesToLink[otherNode.nodeType])){
+												nodesToLink[otherNode.nodeType].push(otherNode);
+											} else {
+												nodesToLink[otherNode.nodeType] = [otherNode];
+											}
+											if(principalNodeType != ""){
+												gm.addEdge(TrendyJob.Model.NodeFactory.getInstance().getEdge(nodeList[i], otherNode));
+											} else {
+												/*if(typeof otherNode[nodeList[i].nodeType] == "undefined"){
+													otherNode[nodeList[i].nodeType] = [nodeList[i]];
+												} else {
+													if($.isArray(otherNode[nodeList[i].nodeType])){
+														otherNode[nodeList[i].nodeType].push(nodeList[i]);
+													}
+												}*/
+											}
+										});
+									});
+									var nodesToLinkarr = $.map(nodesToLink,function(v,k){ return k;});
+									var lastNodeType = nodesToLinkarr[nodesToLinkarr.length-1];
+									$.each(nodesToLink, function(nodeType,nodeList){
+										if(nodeType != lastNodeType){
+											$.each(nodeList, function(useless,node){
+												$.each(nodesToLink, function(nodeType2, nodeList2){
+													if($.inArray(nodeType2,nodesToLinkarr) > $.inArray(node.nodeType,nodesToLinkarr)){
+														$.each(nodeList2, function(useless, otherNode){
+															gm.addEdge(TrendyJob.Model.NodeFactory.getInstance().getEdge(node,otherNode));
+														});
+													}
+												});
+											});
+
+										}
+									});
+								}
+								if(principalNodeType != ""){
+									var allNodeTypes = $.merge([principalNodeType],otherNodeTypes);
+									TrendyJob.Filters.createPageFilters([principalNodeType], scope);
+								} else {
+									allNodeTypes = otherNodeTypes;
+								}
+								TrendyJob.Filters.createPageFilters(allNodeTypes, scope);
+								console.log("settings");
+								TrendyJob.Settings.createPageSettings(allNodeTypes);
+								console.log("ONREADY");
+								gm.onReady();
+							});
+						});
+				});
+			});
+		},
+		onReady : function(){
+
 		}
 	}
 

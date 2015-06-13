@@ -74,6 +74,25 @@ TrendyJob.Settings = {
                     numberOfEdges : "auto"
                 }
             }
+        },
+        technos : {
+            size : {
+                display : "taille",
+                default : "numberOfEdges",
+                actual : "numberOfEdges",
+                attributes : {
+                    numberOfEdges : "auto"
+                }
+            },
+            color : {
+                display : "couleur",
+                default : "title",
+                actual : "title",
+                attributes : {
+                    title : "auto",
+                    numberOfEdges : "auto"
+                }
+            }
         }
 
     },
@@ -106,11 +125,18 @@ TrendyJob.Settings = {
         });
         return html;
     },
-    getActualParamater: function(node,settingType){
+    getActualParameter: function(node,settingType){
         var setting = TrendyJob.Settings.ByNode[node.nodeType][settingType];
         var actualVal = setting.actual;
         if(setting.attributes[actualVal] == "auto"){
             return node[actualVal];
         }
+    },
+    getRange: function(nodeType,settingType){
+        var setting = TrendyJob.Settings.ByNode[node.nodeType][settingType];
+        var actualVal = setting.actual;
+    },
+    getScaleType: function(nodeType, settingType){
+
     }
 }

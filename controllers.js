@@ -11,37 +11,19 @@ angular.module('app.controllers', ['isteven-multi-select'])
     .controller("GraphesJCController", function($scope){
         $.ajax( {
             type: "GET",
-            url: "http://www.trendyjobs.fr/backend/getJobAdverts/100",
+            url: "http://www.trendyjobs.fr/backend/getJobAdverts/1000",
             //TODO replace with trendyjobs adress
             //url: "jobs.json",
             dataType: "json",
             success: function(jobList){
-                $.getScript('scripts/informations.js', function() {
-                    $.getScript('scripts/filters/filters.js', function () {
-                        $.getScript('scripts/settings.js', function () {
-                            $.getScript('scripts/graphManager.js', function () {
-                                $.getScript('scripts/Model/nodeFactory.js', function () {
-                                    for (i = 0; i < jobList.length; ++i) {
-                                        jobList[i].nodeType = 'job';
-                                        TrendyJob.Filters.fillFilters(jobList[i]);
-                                        var gm = GraphManager.getInstance();
-                                        gm.addNode(jobList[i]);
-                                        var cn = gm.findNodeByTitle(jobList[i]['company'],'company');
-                                        if(cn == null) {
-                                            cn = TrendyJob.Model.NodeFactory.getInstance().getNode(jobList[i], 'company');
-                                            gm.addNode(cn);
-                                        }
-                                        var e = TrendyJob.Model.NodeFactory.getInstance().getEdge(jobList[i], cn);
-                                        gm.addEdge(e);
-                                    }
-                                    $.getScript('scripts/d3modules/graph.js', function () {
-                                        D3.printGraph();
-                                    });
-                                    TrendyJob.Filters.createPageFilters(["job"], $scope);
-                                    TrendyJob.Settings.createPageSettings(["job","company"]);
-                                });
-                            });
-                        });
+                //TODO FIXME replace when technos is no more a string
+                /*$.each(jobList,function(useless,node){
+                    node.technos = $.parseJSON(node.technos);
+                });*/
+                $.getScript('scripts/graphManager.js', function () {
+                    GraphManager.getInstance().generatePage("job",["company"],jobList,$scope);
+                    $.getScript('scripts/d3modules/graph.js', function () {
+                        GraphManager.getInstance().onReady = function(){D3.printGraph();};
                     });
                 });
             },
@@ -49,7 +31,53 @@ angular.module('app.controllers', ['isteven-multi-select'])
                 console.log("FAILED");
             }
         });
+    })
 
+    .controller("GraphesJTController", function($scope){
+        $.ajax( {
+            type: "GET",
+            url: "http://www.trendyjobs.fr/backend/getJobAdverts/1000",
+            //TODO replace with trendyjobs adress
+            //url: "jobs.json",
+            dataType: "json",
+            success: function(jobList){
+                //TODO FIXME replace when technos is no more a string
+               /* $.each(jobList,function(useless,node){
+                    node.technos = $.parseJSON(node.technos);
+                });*/
+                $.getScript('scripts/graphManager.js', function () {
+                    GraphManager.getInstance().generatePage("job",["technos"],jobList,$scope);
+                    $.getScript('scripts/d3modules/graph.js', function () {
+                        GraphManager.getInstance().onReady = function(){D3.printGraph();};
+                    });
+                });
+            },
+            fail: function(){
+                console.log("FAILED");
+            }
+        });
+    })
+
+    .controller("GraphesCTController", function($scope){
+        $.ajax( {
+            type: "GET",
+            url: "http://www.trendyjobs.fr/backend/getJobAdverts/1000",
+            //TODO replace with trendyjobs adress
+            //url: "jobs.json",
+            dataType: "json",
+            success: function(jobList){
+
+                $.getScript('scripts/graphManager.js', function () {
+                    GraphManager.getInstance().generatePage("",["company","technos"],jobList,$scope);
+                    $.getScript('scripts/d3modules/graph.js', function () {
+                        GraphManager.getInstance().onReady = function(){D3.printGraph();};
+                    });
+                });
+            },
+            fail: function(){
+                console.log("FAILED");
+            }
+        });
     })
 
 

@@ -62,8 +62,41 @@ TrendyJob.Informations = {
                 displaytype : "shorttext"
             },
             numberOfEdges : {
-                display : "Nombre d'annonces",
+                display : "Nombre de liens",
                 displaytype : "numeric"
+            },
+            job : {
+                display : "Annonces",
+                displaytype : "list",
+                link : "title",
+                ref: "auto"
+            },
+            technos : {
+                display: "Technologies",
+                displaytype : "list",
+                link : "title"
+            }
+        },
+        technos : {
+            display : "Technologie",
+            title : {
+                display : "Nom",
+                displaytype : "shorttext"
+            },
+            numberOfEdges : {
+                display : "Nombre de liens",
+                displaytype : "numeric"
+            },
+            job : {
+                display : "Annonces",
+                displaytype : "list",
+                link : "title",
+                ref: "auto"
+            },
+            company : {
+                display: "Entreprises",
+                displaytype : "list",
+                link : "title"
             }
         }
     },
@@ -72,7 +105,9 @@ TrendyJob.Informations = {
         var htmlres = "";
         $.each(infos, function(key,val){
             if(key != "display"){
-                htmlres += TrendyJob.Informations.generateNodeAttribute(key, val, node[key]);
+                if(typeof node[key]!= "undefined") {
+                    htmlres += TrendyJob.Informations.generateNodeAttribute(key, val, node[key]);
+                }
             }
         });
         return htmlres;
@@ -82,16 +117,18 @@ TrendyJob.Informations = {
         html = html.replace(/PROPDISPLAY/g,propattrs["display"]);
         if(propattrs["displaytype"] == "list"){
             var htmlValue = "";
-            console.log(propvalue);
-            if(typeof propvalue == "string"){
-                propvalue = $.parseJSON(propvalue);
-            }
             $.each(propvalue,function(i,el){
-                //accessing techno name
-                console.log(el);
-                htmlValue += "<li>" + el + "</li>";
+                var displayedVal = el;
+                if(typeof propattrs["link"] != "undefined"){
+                    displayedVal = displayedVal[propattrs["link"]];
+                }
+                htmlValue += "<li>" + displayedVal + "</li>";
             });
             propvalue = htmlValue;
+        } else {
+            if(typeof propattrs["link"] != "undefined"){
+                propvalue = propvalue[propattrs["link"]];
+            }
         }
         html = html.replace(/VALUE/g,propvalue);
         return html;

@@ -7,6 +7,8 @@ D3.edges = [];
 D3.force = {};
 D3.radius = {};
 D3.colors = {};
+D3.charge = -400;
+D3.linkDistance = 300;
 
 D3.generateColours = function(n){
 	var gColors = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
@@ -38,11 +40,13 @@ D3.update = function(){
 		.on("dragend", dragended);
 
 	//TODO add type of nodes considered
-	$.each(["job","company"],function(i,nodeType){
+	$.each(GraphManager.getInstance().getNodeTypes(),function(i,nodeType){
+		var consideredNodes = $.grep(D3.nodes,function(n){ return n.nodeType == nodeType; });
+		console.log(consideredNodes);
 		D3.radius[nodeType] = d3.scale.linear()
-			.domain([0, d3.max(GraphManager.getInstance().getNodesByType(nodeType),function(n){ return TrendyJob.Settings.getActualParamater(n,"size"); })])
+			.domain([0, d3.max(consideredNodes,function(n){ return TrendyJob.Settings.getActualParameter(n,"size"); })])
 			.range([6,30]);
-		var tmpArray = GraphManager.getInstance().getNodesByType(nodeType).map(function(n){ return TrendyJob.Settings.getActualParamater(n,"color")});
+		var tmpArray = consideredNodes.map(function(n){ return TrendyJob.Settings.getActualParameter(n,"color")});
 		tmpArray = $.grep(tmpArray, function(el, index){
 			return index == $.inArray(el, tmpArray);
 		});
@@ -81,8 +85,8 @@ D3.update = function(){
 
 	enode.append("circle");
 
-	node.selectAll("circle").attr("fill",function(d){ return D3.colors[d.nodeType](TrendyJob.Settings.getActualParamater(d,"color"))})
-		.attr("r", function(d){ return D3.radius[d.nodeType](TrendyJob.Settings.getActualParamater(d,"size")); });
+	node.selectAll("circle").attr("fill",function(d){ return D3.colors[d.nodeType](TrendyJob.Settings.getActualParameter(d,"color"))})
+		.attr("r", function(d){ return D3.radius[d.nodeType](TrendyJob.Settings.getActualParameter(d,"size")); });
 
 	enode.append("text")
 		.attr("dx", 12)
@@ -92,7 +96,6 @@ D3.update = function(){
 		.text(function(d) { return d.title });
 
 	enode.on("click",function(d){
-		console.log(d);
 			$("#nodeMenu * .panel-title a").empty();
 			$("#nodeMenu * .panel-title a").append(TrendyJob.Informations.generateNodeTitle(d));
 			$("#nodeMenu * .panel-body").empty();
@@ -109,9 +112,9 @@ D3.update = function(){
 	var i=0;
 
 	D3.force.gravity(.05)
-		.charge(-300)
+		.charge(D3.charge)
 		.size([D3.w, D3.h])
-		.linkDistance(100)
+		.linkDistance(D3.linkDistance)
 		/*.nodes(D3.nodes)
 		.links(D3.edges)*/
 		.start();
@@ -177,7 +180,7 @@ D3.printGraph = function(){
 							var centerCoordinates = [0, 0];
 
 							var zoom = d3.behavior.zoom()
-							    .scaleExtent([1, 10])
+							    .scaleExtent([0, 10])
 							    //.center([w/2,h/2]) (center zoom op)
 							    .on("zoom", zoomed);
 

@@ -37,7 +37,30 @@ TrendyJob.Filters = {
                 'type': 'comboBox',
                 'company': 'multiText',
                 'wage': 'numeric',
-                'date': 'date'
+                'date': 'date',
+                'technos': 'multiText'
+            },
+            // TODO : la définition des listes devraient pas avoir lieu là, l'user veut juste saisir pour chaque prop le type de filtre, il n'a pas à faire ça!
+            'multiTextList': {},
+            'comboBoxList': {},
+            'numericList' : {},
+            'scope': {},
+            'activeFilterList': {}
+        },
+        'company': {
+            'filtersType': {
+                'title': 'multiText'
+            },
+            // TODO : la définition des listes devraient pas avoir lieu là, l'user veut juste saisir pour chaque prop le type de filtre, il n'a pas à faire ça!
+            'multiTextList': {},
+            'comboBoxList': {},
+            'numericList' : {},
+            'scope': {},
+            'activeFilterList': {}
+        },
+        'technos': {
+            'filtersType': {
+                'title': 'multiText'
             },
             // TODO : la définition des listes devraient pas avoir lieu là, l'user veut juste saisir pour chaque prop le type de filtre, il n'a pas à faire ça!
             'multiTextList': {},
@@ -112,22 +135,30 @@ TrendyJob.Filters = {
                     modifiedList[key] = [];
                 }
                 if(nodeObject[key] != "") {
-                    if ($.inArray(nodeObject[key], modifiedList[key]) == -1) {
-                        if (filtersType[key] == "multiText") {
-                            var inArray = false;
-                            for (var i = 0; i < modifiedList[key].length; ++i) {
-                                if (modifiedList[key][i].text == nodeObject[key]) {
-                                    inArray = true;
-                                    break;
-                                }
-                            }
-                            if (!inArray) {
-                                modifiedList[key].push({"text": nodeObject[key], "ticked": true});
-                            }
-                        } else {
-                            modifiedList[key].push(nodeObject[key]);
-                        }
+                    var values = nodeObject[key];
+
+                    if(!$.isArray(values) && !$.isPlainObject(values)){
+                        values = [values];
                     }
+                    $.each(values,function(useless, val){
+                        if ($.inArray(val, modifiedList[key]) == -1) {
+                            if (filtersType[key] == "multiText") {
+                                var inArray = false;
+                                for (var i = 0; i < modifiedList[key].length; ++i) {
+                                    if (modifiedList[key][i].text == val) {
+                                        inArray = true;
+                                        break;
+                                    }
+                                }
+                                if (!inArray) {
+                                    modifiedList[key].push({"text": val, "ticked": true});
+                                }
+                            } else {
+                                modifiedList[key].push(val);
+                            }
+                        }
+                    });
+
                 }
 
             }
@@ -168,7 +199,13 @@ TrendyJob.Filters = {
                 newScope.mtlist = nodeFilters[filterType + "List"][key];
                 var selectedList = function(mtlist_out){
                     nodeFilters.activeFilterList[key] = $.grep(GraphManager.getInstance().getNodes(nodeType),function(n){
-                        return $.inArray(n[key],mtlist_out) != -1;
+                        var retValue = $.inArray(n[key],mtlist_out) != -1;
+                        if($.isArray(n[key]) || $.isPlainObject(n[key])){
+                            $.each(n[key],function(useless,value){
+                                retValue = retValue ||  $.inArray(value,mtlist_out) != -1;
+                            });
+                        }
+                        return retValue;
                     });
                     TrendyJob.Filters.refreshNodeList(nodeFilters,nodeType);
                 };

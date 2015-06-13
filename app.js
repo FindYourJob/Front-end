@@ -25,6 +25,14 @@ angular.module('FYJApp', ['ngRoute', 'app.controllers'])
 	templateUrl: 'templates/graphes-job-company.html',
 	controller: 'GraphesJCController'
       }).
+        when('/Graphe-Job-Technology', {
+          templateUrl: 'templates/graphes-job-company.html',
+          controller: 'GraphesJTController'
+        }).
+        when('/Graphe-Company-Technology', {
+          templateUrl: 'templates/graphes-job-company.html',
+          controller: 'GraphesCTController'
+        }).
       when('/Geo-Annonces', {
 	templateUrl: 'templates/geo-annonces.html',
 	controller: 'GeoAnnoncesController'
