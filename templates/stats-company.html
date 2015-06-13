@@ -1,6 +1,6 @@
 <script src="scripts/d3.tip.v0.6.3.js"></script>
 <style>
-			#test {
+			#scrollArea {
   overflow:auto;
 }
 
@@ -32,6 +32,21 @@
   top: 100%;
   left: 0;
 }
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+    background-color: #F0F0F0 ;
+}
 </style>
 
 <script type="text/javascript">
@@ -55,8 +70,6 @@
 	    .scale(y)
 	    .orient("left")
 	    .ticks(10);
-
-	    
 
     var tip = d3.tip()
 	    .attr('class', 'd3-tip')
@@ -97,7 +110,9 @@
 	    	x.domain(data.map(function(d) { return d[paramX] }));
 	    	y.domain([0, d3.max(data, function(d) { return parseInt(d[paramY]); })]);
 
-	    	document.getElementById("CompanyNameMax").innerHTML = "L'entreprise <strong>"+ data[data.length-1].company +"</strong> est l'entreprise proposant le plus d'offres avec <strong>"+ data[data.length-1].nbAdverts +"</strong> annonces actuellement";
+			if(data[0].company != undefined){
+	    		document.getElementById("CompanyNameMax").innerHTML = "L'entreprise <strong>"+ data[data.length-1].company +"</strong> est l'entreprise proposant le plus d'offres avec <strong>"+ data[data.length-1].nbAdverts +"</strong> annonces actuellement";
+	    	}
 
 	    	svg.selectAll(".bar").remove();
 			svg.selectAll(".axis").remove();
@@ -146,7 +161,7 @@
 	    	});
 
 
-	    	/*var select = document.getElementsByClassName("selectpicker")[0]; 
+	    	var select = document.getElementsByClassName("selectpicker")[0]; 
 	    	console.log(data);
 	    	for (var i=0; i<data.length; i++)
 	    	{
@@ -155,7 +170,7 @@
 	    		el.textContent = opt;
 	    		el.value = opt;
 	    		select.appendChild(el);
-	    	}*/
+	    	}
 
 	    });
 	}	
@@ -163,13 +178,12 @@
 	update("http://trendyjobs.fr/backend/getNbAdvertsByCompany/200",x,y,svg1,"company", "nbAdverts")
 
 
-	// Si étude d'une entreprise en particulier ? Select ou click sur bar chat ?
-	/*$('.selectpicker').on('change', function(){
+	$('.selectpicker').on('change', function(){
 	var selected = $(this).find("option:selected").val();
 	console.log(selected);
 	update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+selected+"/10",x,y,svg2,"name","nbAdverts");
 
-	});*/
+	});
 
 
 
@@ -179,7 +193,7 @@
 	<h1> Toutes les entreprises </h1>
 
 	<div class="row">
-		<div id="test" class="col-md-8">
+		<div id="scrollArea" class="col-md-8">
   			<div id="GraphiqueContainer1"> </div>
 		</div>
 		<div class="col-md-4">
@@ -189,9 +203,8 @@
 	</div>
 <h1> Etude d'une entreprise en particulier </h1>
 	<div class="row">
-	    <!-- Select ou clique sur Barchart ou les deux ?
-	    <select class="selectpicker"></select>-->
-		<div id="test" class="col-md-8">
+	    <select class="selectpicker"></select>
+		<div class="col-md-8">
 			<div id="GraphiqueContainer2"> </div>
 		</div>
 		<div class="col-md-4">
