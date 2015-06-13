@@ -1,6 +1,6 @@
 <script src="scripts/d3.tip.v0.6.3.js"></script>
 <style>
-			#scrollArea {
+#scrollArea {
   overflow:auto;
 }
 
@@ -51,57 +51,55 @@
 
 <script type="text/javascript">
 
-	// Premier graph
-	var margin = {top: 20, right: 20, bottom: 150, left: 40},
-	    width = 960 - margin.left - margin.right,
-	    height = 400 - margin.top - margin.bottom;
-
-	var x = d3.scale.ordinal()
-	    .rangeRoundBands([0, width], .1);
-
-	var y = d3.scale.linear()
-	    .range([height, 0]);
-
-	var xAxis = d3.svg.axis()
-	    .scale(x)
-	    .orient("bottom");
-
-	var yAxis = d3.svg.axis()
-	    .scale(y)
-	    .orient("left")
-	    .ticks(10);
-
-    var tip = d3.tip()
-	    .attr('class', 'd3-tip')
-	    .offset([-10, 0])
-	    .html(function(d) {
-	      return "<strong>"+d[Object.keys(d)[0]]+" : </strong> <span style='color:red'>" + d[Object.keys(d)[1]]  + "</span>";
-	    })
-
-	var svg1 = d3.select("#GraphiqueContainer1").append("svg")
-	    .attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
-	  .append("g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-	svg1.call(tip);
-
+	var svg1;
+	var svg2;
+	//TODO FIXME color not on the graphic
 	var color = d3.scale.linear()
     .domain([0, 20])
     .range(["#99CCFF", "#0000CC"]);
-	
 
-	var svg2 = d3.select("#GraphiqueContainer2").append("svg")
-	    .attr("width", width + margin.left + margin.right)
-	    .attr("height", height + margin.top + margin.bottom)
-	  .append("g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-10, 0])
+	.html(function(d) {
+	  return "<strong>"+d[Object.keys(d)[0]]+" : </strong> <span style='color:red'>" + d[Object.keys(d)[1]]  + "</span>";
+	})
 
-
-	function update(url,x,y,svg,paramX, paramY) {
+	function update(url,svg,paramX, paramY, widthh, heightt, grapheContainer) {
 
 	    d3.xhr(url, function(data) {
 
+			var margin = {top: 30, right: 20, bottom: 150, left: 40},
+			width = widthh - margin.left - margin.right,
+			height = heightt - margin.top - margin.bottom;
+
+			var x = d3.scale.ordinal()
+			.rangeRoundBands([0, width], .1);
+
+			var y = d3.scale.linear()
+			.range([height, 0]);
+
+			var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient("bottom");
+
+			var yAxis = d3.svg.axis()
+			.scale(y)
+			.orient("left")
+			.ticks(10);	
+
+			d3.select(grapheContainer).select("svg").remove();	
+
+			svg = d3.select(grapheContainer).append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			svg.selectAll(".bar").remove();
+			svg.selectAll(".axis").remove(); 
+
+			svg.call(tip);		
 
 	    	data=JSON.parse(data["response"]);
 
@@ -114,8 +112,7 @@
 	    		document.getElementById("CompanyNameMax").innerHTML = "L'entreprise <strong>"+ data[data.length-1].company +"</strong> est l'entreprise proposant le plus d'offres avec <strong>"+ data[data.length-1].nbAdverts +"</strong> annonces actuellement";
 	    	}
 
-	    	svg.selectAll(".bar").remove();
-			svg.selectAll(".axis").remove();
+			console.log(data[0].name);
 
 	    	svg.append("g")
 		    	.attr("class", "x axis")
@@ -133,9 +130,9 @@
 		    	.attr("class", "y axis")
 		    	.call(yAxis)
 		    	.append("text")
-		    	.attr("transform", "rotate(-90)")
 		    	.attr("y", 6)
-		    	.attr("dy", ".71em")
+		    	.attr("dy", "-2em")
+		    	.attr("dx", "1em")
 		    	.style("text-anchor", "end")
 		    	.text(paramY);
 
@@ -143,7 +140,7 @@
 	    	.data(data)
 	    	.enter().append("rect")
 	    	.attr("class", "bar")
-	    	.attr("fill", function(d) { return color(d[paramY])})
+	    	.attr("fill", "function(d) { return color(d[paramY])}")
 	    	.attr("x", function(d) { return x(d[paramX]); })
 	    	.attr("width", x.rangeBand())
 	    	.attr("y", function(d) { return y(d[paramY]); })
@@ -152,7 +149,7 @@
       		.on('mouseout', tip.hide)
 	    	.on("click", function(d){
 	    		if(d.company != undefined){
-	    			update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+d.company+"/10",x,y,svg2,"name","nbAdverts");
+	    			update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+d.company+"/10",svg2,"name","nbAdverts",700,300,"#GraphiqueContainer2");
 	    			document.getElementById("CompanyName").innerHTML = "Entreprise : "+ d.company;
 	    			document.getElementById("NbTotal").innerHTML = "Nombre d'annonces total : "+ d.nbAdverts;
 
@@ -175,13 +172,13 @@
 	    });
 	}	
 
-	update("http://trendyjobs.fr/backend/getNbAdvertsByCompany/200",x,y,svg1,"company", "nbAdverts")
+	update("http://trendyjobs.fr/backend/getNbAdvertsByCompany/200",svg1,"company", "nbAdverts",960,300,"#GraphiqueContainer1")
 
 
 	$('.selectpicker').on('change', function(){
 	var selected = $(this).find("option:selected").val();
 	console.log(selected);
-	update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+selected+"/10",x,y,svg2,"name","nbAdverts");
+	update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+selected+"/10",svg2,"name","nbAdverts",700,300,"#GraphiqueContainer2");
 
 	});
 
