@@ -53,10 +53,6 @@
 
 	var svg1;
 	var svg2;
-	//TODO FIXME color not on the graphic
-	var color = d3.scale.linear()
-    .domain([0, 20])
-    .range(["#99CCFF", "#0000CC"]);
 
 	var tip = d3.tip()
 	.attr('class', 'd3-tip')
@@ -108,11 +104,15 @@
 	    	x.domain(data.map(function(d) { return d[paramX] }));
 	    	y.domain([0, d3.max(data, function(d) { return parseInt(d[paramY]); })]);
 
+
+			var color = d3.scale.linear()
+    		.domain([0, d3.max(data, function(d) { return parseInt(d[paramY])})])
+    		.range(["yellow", "red"]);
+
 			if(data[0].company != undefined){
 	    		document.getElementById("CompanyNameMax").innerHTML = "L'entreprise <strong>"+ data[data.length-1].company +"</strong> est l'entreprise proposant le plus d'offres avec <strong>"+ data[data.length-1].nbAdverts +"</strong> annonces actuellement";
 	    	}
 
-			console.log(data[0].name);
 
 	    	svg.append("g")
 		    	.attr("class", "x axis")
@@ -140,7 +140,7 @@
 	    	.data(data)
 	    	.enter().append("rect")
 	    	.attr("class", "bar")
-	    	.attr("fill", "function(d) { return color(d[paramY])}")
+	    	.attr("fill", function(d) { return color(d[paramY])})
 	    	.attr("x", function(d) { return x(d[paramX]); })
 	    	.attr("width", x.rangeBand())
 	    	.attr("y", function(d) { return y(d[paramY]); })
@@ -158,11 +158,20 @@
 	    	});
 
 	    	if(data[0].company != undefined){
+	    		d = data;
+	    		// TODO FIXME sorting doesn't work very well
+	    		d.sort(function(a,b) {  return (a[paramX])>(b[paramX]);});
+	    		console.log(d[0]);
+	    		console.log(d[1]);
+	    		console.log(d[2]);
+	    		console.log(d[4]);
 
-		    	var select = document.getElementsByClassName("selectpicker")[0]; 
-		    	for (var i=0; i<data.length; i++)
+
+		    	var select = document.getElementsByClassName("selectpicker")[0];
+	    		console.log(d);
+		    	for (var i=0; i<d.length; i++)
 		    	{
-		    		var opt = data[i][paramX];
+		    		var opt = d[i][paramX];
 		    		var el = document.createElement("option");
 		    		el.textContent = opt;
 		    		el.value = opt;
@@ -177,9 +186,18 @@
 
 
 	$('.selectpicker').on('change', function(){
-	var selected = $(this).find("option:selected").val();
-	console.log(selected);
-	update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+selected+"/10",svg2,"name","nbAdverts",700,300,"#GraphiqueContainer2");
+		var selected = $(this).find("option:selected").val();
+		update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+selected+"/10",svg2,"name","nbAdverts",700,300,"#GraphiqueContainer2");
+		var sel = d3.selectAll(".bar")[0]; 
+		for (var i = 0 ;   i<sel.length; i++)
+		{
+			if(sel[i].__data__.company != undefined){
+				if(sel[i].__data__.company == selected){
+					document.getElementById("CompanyName").innerHTML = "Entreprise : "+ sel[i].__data__.company;
+	    			document.getElementById("NbTotal").innerHTML = "Nombre d'annonces total :  " + sel[i].__data__.nbAdverts;
+				}
+			}
+		}
 
 	});
 
