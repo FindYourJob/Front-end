@@ -65,6 +65,10 @@ TrendyJob.Informations = {
                 display : "Nombre de liens",
                 displaytype : "numeric"
             },
+            actualNumberOfEdges : {
+                display : "Nombre de liens actuel",
+                displaytype : "numeric"
+            },
             job : {
                 display : "Annonces",
                 displaytype : "list",
@@ -85,6 +89,10 @@ TrendyJob.Informations = {
             },
             numberOfEdges : {
                 display : "Nombre de liens",
+                displaytype : "numeric"
+            },
+            actualNumberOfEdges : {
+                display : "Nombre de liens actuel",
                 displaytype : "numeric"
             },
             job : {

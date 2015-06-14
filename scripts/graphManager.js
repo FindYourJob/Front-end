@@ -37,6 +37,7 @@ GraphManager = (function (){
 				this.internalNodes[node.nodeType][node.id] = jQuery.extend(true, {}, node);
 				this.internalNodes[node.nodeType][node.id].mapPos = this.mapPos;
 				this.internalNodes[node.nodeType][node.id].numberOfEdges = 0;
+				this.internalNodes[node.nodeType][node.id].actualNumberOfEdges = 0;
 				this.nodes[this.mapPos] = this.internalNodes[node.nodeType][node.id];
 				this.mapPos++;
 				this.hasChanged = true;
@@ -62,6 +63,7 @@ GraphManager = (function (){
 				retArray[i] = this.findNode(stArray[i].id,stArray[i].type);
         			if(typeof retArray[i] !== 'undefined'){
         				retArray[i].numberOfEdges++;
+						retArray[i].actualNumberOfEdges++;
         			}
         		}
 			edgeExists = false;
@@ -112,6 +114,9 @@ GraphManager = (function (){
 		getUpdatedEdges:function(newNodes){
 			var retEdges = [];
 			var j, i;
+			$.each(newNodes, function(useless,n){
+				n.actualNumberOfEdges = 0;
+			});
 			$.each(this.edges,function(j,e){
 				var sourcePos = -1;
 				var targetPos = -1;
@@ -127,6 +132,8 @@ GraphManager = (function (){
 				});
 
 				if(sourcePos != -1 && targetPos != -1){
+					newNodes[sourcePos].actualNumberOfEdges++;
+					newNodes[targetPos].actualNumberOfEdges++;
 					retEdges.push({source: newNodes[sourcePos],target : newNodes[targetPos]});
 				}
 			});
@@ -241,7 +248,6 @@ GraphManager = (function (){
 								}
 								if(principalNodeType != ""){
 									var allNodeTypes = $.merge([principalNodeType],otherNodeTypes);
-									TrendyJob.Filters.createPageFilters([principalNodeType], scope);
 								} else {
 									allNodeTypes = otherNodeTypes;
 								}

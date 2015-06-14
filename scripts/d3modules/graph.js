@@ -5,8 +5,8 @@ if(typeof D3 == "undefined"){
 D3.nodes = [];
 D3.edges = [];
 D3.force = {};
-D3.radius = {};
-D3.colors = {};
+D3.size = {};
+D3.color = {};
 D3.charge = -400;
 D3.linkDistance = 300;
 
@@ -40,19 +40,44 @@ D3.update = function(){
 		.on("dragend", dragended);
 
 	//TODO add type of nodes considered
-	$.each(GraphManager.getInstance().getNodeTypes(),function(i,nodeType){
-		var consideredNodes = $.grep(D3.nodes,function(n){ return n.nodeType == nodeType; });
-		console.log(consideredNodes);
-		D3.radius[nodeType] = d3.scale.linear()
-			.domain([0, d3.max(consideredNodes,function(n){ return TrendyJob.Settings.getActualParameter(n,"size"); })])
-			.range([6,30]);
-		var tmpArray = consideredNodes.map(function(n){ return TrendyJob.Settings.getActualParameter(n,"color")});
-		tmpArray = $.grep(tmpArray, function(el, index){
-			return index == $.inArray(el, tmpArray);
+	$.each(["size","color"],function(useless,settingType){
+		$.each(GraphManager.getInstance().getNodeTypes(), function (i, nodeType) {
+			var consideredNodes = $.grep(D3.nodes, function (n) {
+				return n.nodeType == nodeType;
+			});
+			var scaleType, scale;
+			scaleType = TrendyJob.Settings.getScaleType(nodeType, settingType);
+			/*console.log(nodeType);
+			console.log(settingType);
+			console.log(scaleType);*/
+			if (scaleType == "linear") {
+				D3[settingType][nodeType] = d3.scale.linear()
+					.domain([0, d3.max(consideredNodes, function (n) {
+						return TrendyJob.Settings.getActualParameter(n, settingType);
+					})]);
+
+					if(settingType == "size"){
+						D3[settingType][nodeType].range([6, 30]);
+					} else if(settingType == "color"){
+						D3[settingType][nodeType].range([d3.rgb(255,243,232), d3.rgb(255,0,0)]);
+					}
+			} else {
+				var tmpArray = consideredNodes.map(function (n) {
+					return TrendyJob.Settings.getActualParameter(n, settingType)
+				});
+				tmpArray = $.grep(tmpArray, function (el, index) {
+					return index == $.inArray(el, tmpArray);
+				});
+				D3[settingType][nodeType] = d3.scale.ordinal()
+					.domain(tmpArray);
+				if(settingType == "size"){
+					D3[settingType][nodeType].range(tmpArray);
+				} else if(settingType == "color"){
+					D3[settingType][nodeType].range(D3.generateColours(tmpArray.length));
+				}
+
+			}
 		});
-		D3.colors[nodeType] = d3.scale.ordinal()
-			.domain(tmpArray)
-			.range(D3.generateColours(tmpArray.length));
 	});
 
 	var link = D3.container.selectAll(".link")
@@ -85,8 +110,8 @@ D3.update = function(){
 
 	enode.append("circle");
 
-	node.selectAll("circle").attr("fill",function(d){ return D3.colors[d.nodeType](TrendyJob.Settings.getActualParameter(d,"color"))})
-		.attr("r", function(d){ return D3.radius[d.nodeType](TrendyJob.Settings.getActualParameter(d,"size")); });
+	node.selectAll("circle").attr("fill",function(d){ return D3.color[d.nodeType](TrendyJob.Settings.getActualParameter(d,"color"))})
+		.attr("r", function(d){ return D3.size[d.nodeType](TrendyJob.Settings.getActualParameter(d,"size")); });
 
 	enode.append("text")
 		.attr("dx", 12)

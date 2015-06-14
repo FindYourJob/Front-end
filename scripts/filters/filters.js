@@ -15,18 +15,18 @@ if(typeof TrendyJob.Filters == "undefined"){
 TrendyJob.Filters = {
     FiltersType : {
         "numeric" : {
-            "display": "<div> <input type=\"number\" id=\"PROPNAME-filter-numeric-over\" name=\"PROPNAME-filter-numeric-over\" value=\"OVER-VAL\" /> &gt; PROPNAME &lt; <input type=\"number\" id=\"PROPNAME-filter-numeric-under\" name=\"PROPNAME-filter-numeric-under\" value=\"UNDER-VAL\"/> </div>"
+            "display": "<div> <input type=\"number\" id=\"PROPNAME-filter-numeric-over\" name=\"PROPNAME-filter-numeric-over\" value=\"OVER-VAL\" /> &gt; PROPDISPLAY &lt; <input type=\"number\" id=\"PROPNAME-filter-numeric-under\" name=\"PROPNAME-filter-numeric-under\" value=\"UNDER-VAL\"/> </div>"
         },
         'comboBox': {
-            "display": "<div> PROPNAME : <select id=\"NODENAME-PROPNAME-cb\"> LIST </select> </div>"
+            "display": "<div> PROPDISPLAY : <select id=\"NODENAME-PROPNAME-cb\"> LIST </select> </div>"
         },
         'multiText': {
             //"display" : "<div class=\"ui-widget\"> PROPNAME : <input type=\"text\" name=\"PROPNAME\" id=\"PROPNAME-autocomplete\"> </input> </div> \n <div id=\"PROPNAME-selected-list\"></div>"
             //"display" : "<select id=\"PROPNAME-multiText\" name=\"PROPNAME-multiText\" multiple=\"multiple\"> LIST </select>"
-            "display" : "<div isteven-multi-select id=\"NODENAME-PROPNAME-mt\" input-model=\"mtlist\" output-model=\"mtlist_out\" button-label=\"BUTTON-LABEL\" item-label=\"ITEM-LABEL\" max-labels=\"2\" max-height=\"200px\" tick-property=\"ticked\" on-item-click=\"itemclickfn()\" on-select-all=\"selectallfn()\" on-select-none=\"selectnonefn()\" on-reset=\"resetfn()\"> </div>"
+            "display" : "<h5> PROPDISPLAY : </h5> <div isteven-multi-select id=\"NODENAME-PROPNAME-mt\" input-model=\"mtlist\" output-model=\"mtlist_out\" button-label=\"BUTTON-LABEL\" item-label=\"ITEM-LABEL\" max-labels=\"2\" max-height=\"200px\" tick-property=\"ticked\" on-item-click=\"itemclickfn()\" on-select-all=\"selectallfn()\" on-select-none=\"selectnonefn()\" on-reset=\"resetfn()\"> </div>"
         },
         'date' : {
-            "display" : "<div> PROPNAME : </div>"
+            "display" : "<div> PROPDISPLAY : </div>"
         }
     },
     NodeFilters: {
@@ -178,6 +178,7 @@ TrendyJob.Filters = {
     generateFilter: function(nodeFilters, key, nodeType, filterBody, scope){
         displayContent = TrendyJob.Filters.FiltersType[nodeFilters.filtersType[key]].display;
         displayContent = displayContent.replace(/PROPNAME/g,key);
+        displayContent = displayContent.replace(/PROPDISPLAY/g,TrendyJob.Informations.ByNode[nodeType][key].display);
         displayContent = displayContent.replace(/NODENAME/g,nodeType);
         filterType = nodeFilters.filtersType[key];
         if(filterType == "comboBox"){

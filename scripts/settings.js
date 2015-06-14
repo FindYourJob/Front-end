@@ -13,6 +13,8 @@ if(typeof TrendyJob.Settings == "undefined"){
 }
 
 TrendyJob.Settings = {
+    nodeDisplay : "<h4 class=\"node-title\"> NODETYPEDISPLAY </h4>",
+    containerSelector : "#left-menu1 #collapseTwo .panel-body",
     SettingType : {
         "shape" : "<div> PROPDISPLAY : <select id=\"NODETYPE-SETTINGNAME\"> CBLIST </select></div>",
         "size" : "<div> PROPDISPLAY : <select id=\"NODETYPE-SETTINGNAME\"> CBLIST </select></div>",
@@ -71,7 +73,7 @@ TrendyJob.Settings = {
                 actual : "title",
                 attributes : {
                     title : "auto",
-                    numberOfEdges : "auto"
+                    numberOfEdges : "numeric"
                 }
             }
         },
@@ -90,7 +92,7 @@ TrendyJob.Settings = {
                 actual : "title",
                 attributes : {
                     title : "auto",
-                    numberOfEdges : "auto"
+                    numberOfEdges : "numeric"
                 }
             }
         }
@@ -103,6 +105,9 @@ TrendyJob.Settings = {
     },
     generateNodeSettings : function(nodeType){
         var settings = TrendyJob.Settings.ByNode[nodeType];
+        var html = TrendyJob.Settings.nodeDisplay;
+        html = html.replace(/NODETYPEDISPLAY/,TrendyJob.Informations.ByNode[nodeType].display);
+        $(TrendyJob.Settings.containerSelector).append(html);
         $.each(settings, function(key,val){
             TrendyJob.Settings.generateNodeSetting(val,key,nodeType);
         });
@@ -118,8 +123,9 @@ TrendyJob.Settings = {
             cblist += "<option value=\"" + key + "\"> " + dispKey + "</option>";
         });
         html = html.replace(/CBLIST/g,cblist);
-        $("#left-menu1 #collapseTwo .panel-body").append(html);
+        $(TrendyJob.Settings.containerSelector).append(html);
         $("#" + nodeType + "-" + settingName).change(function(){
+            console.log(nodeType + "CHANGED");
             TrendyJob.Settings.ByNode[nodeType][settingName].actual = $("#" + nodeType + "-" + settingName + " option:selected").val();
             D3.update();
         });
@@ -128,15 +134,25 @@ TrendyJob.Settings = {
     getActualParameter: function(node,settingType){
         var setting = TrendyJob.Settings.ByNode[node.nodeType][settingType];
         var actualVal = setting.actual;
-        if(setting.attributes[actualVal] == "auto"){
+        if(setting.attributes[actualVal] == "auto" || setting.attributes[actualVal] == "numeric"){
             return node[actualVal];
         }
     },
     getRange: function(nodeType,settingType){
-        var setting = TrendyJob.Settings.ByNode[node.nodeType][settingType];
+        var setting = TrendyJob.Settings.ByNode[nodeType][settingType];
         var actualVal = setting.actual;
     },
     getScaleType: function(nodeType, settingType){
-
+        var setting = TrendyJob.Settings.ByNode[nodeType][settingType];
+        var actualVal = setting.actual;
+        var retValue;
+        if(setting.attributes[actualVal] == "numeric"){
+            retValue = "linear";
+        } else if(settingType == "size"){
+            retValue = "linear";
+        } else {
+            retValue = "ordinal";
+        }
+        return retValue;
     }
 }
