@@ -14,10 +14,10 @@ if(typeof TrendyJob.Informations == "undefined"){
 
 TrendyJob.Informations = {
     InformationType : {
-        "longtext" : "<div class=\"panel panel-default\"> <div class=\"panel-heading\"> PROPDISPLAY : </div> <div class=\"panel-body longtext\"> VALUE </div> </div>",
-        "numeric" : "<div class=\"numeric\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>",
-        "shorttext" : "<div class=\"shorttext\"> <p class=\"title\"> PROPDISPLAY : </p> <p> VALUE </p> </div>",
-        "list" : "<div class=\"trendyJob-list\"> PROPDISPLAY : <ul> VALUE  </ul> </div>"
+        "longtext" : "<div class=\"panel panel-default\"> <div class=\"panel-heading\"> PROPDISPLAY : </div> <perfect-scrollbar class=\"panel-body longtext scroller\" suppress-scroll-x=true scroll-y-margin-offset=\"5\"> VALUE </perfect-scrollbar> </div>",
+        "numeric" : "<div class=\"panel panel-default numeric\"> <div class=\"panel-heading\"> PROPDISPLAY : </div> <div class=\"panel-body\"> VALUE </div> </div>",
+        "shorttext" : "<div class=\"panel panel-default shorttext\"> <div class=\"panel-heading\"> PROPDISPLAY : </div> <div class=\"panel-body\"> VALUE </div> </div>",
+        "list" : "<div class=\"panel panel-default\"> <div class=\"panel-heading\"> PROPDISPLAY : </div> <perfect-scrollbar class=\"panel-body trendyJob-list scroller\" suppress-scroll-x=true> <ul> VALUE  </ul> </perfect-scrollbar> </div>"
     },
     ByNode : {
         job : {
@@ -109,18 +109,38 @@ TrendyJob.Informations = {
         }
     },
     generateNodeInfo : function(node){
+        $("#nodeMenu * .panel-title a").empty();
+        $("#nodeMenu * .panel-title a").append(TrendyJob.Informations.generateNodeTitle(node));
+        $("#nodeMenu * .panel-body").empty();
+        $("#nodeMenu").width($("svg").width() * 20 / 100);
+        //$("#nodeMenu * .panel-body").append(TrendyJob.Informations.generateNodeInfo(d));
         var infos = TrendyJob.Informations.ByNode[node.nodeType];
         var htmlres = "";
+        var infosContainer = $("#nodeMenu * .panel-body");
         $.each(infos, function(key,val){
             if(key != "display"){
                 if(typeof node[key]!= "undefined") {
-                    htmlres += TrendyJob.Informations.generateNodeAttribute(key, val, node[key]);
+                    htmlres += TrendyJob.Informations.generateNodeAttribute(key, val, node[key],infosContainer);
+                    //htmlres += TrendyJob.Informations.generateNodeAttribute(key, val, node[key]);
                 }
             }
         });
-        return htmlres;
+        angular.element(document.body).injector().invoke(function($compile) {
+            htmlres = angular.element(htmlres);
+            infosContainer.append($compile(htmlres)(angular.element(document.body).scope()));
+        });
+        //return htmlres;
+        $("#nodeMenu").css("left", $("svg").width() - $("#nodeMenu").width() - 35 + "px");
+
+        /*$("#nodeMenu * .panel-body").css("max-height", $("svg").height() - $("#nodeMenu").height() + "px");
+        $("#nodeMenu * .panel-body").css("overflow", "auto");*/
+
+        $("#nodeMenu").show("fast");
+        $("#closeNode").click(function(){
+            $("#nodeMenu").hide("fast");
+        });
     },
-    generateNodeAttribute : function(propname, propattrs, propvalue){
+    generateNodeAttribute : function(propname, propattrs, propvalue, infosContainer){
         var html = TrendyJob.Informations.InformationType[propattrs["displaytype"]];
         html = html.replace(/PROPDISPLAY/g,propattrs["display"]);
         if(propattrs["displaytype"] == "list"){

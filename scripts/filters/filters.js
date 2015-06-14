@@ -232,7 +232,6 @@ TrendyJob.Filters = {
                 newScope.$apply();
                 nodeFilters.scope[key] = newScope;
         });
-            //scope.$apply;
         }
         if(filterType == "numeric"){
             displayContent = displayContent.replace(/OVER-VAL/g,nodeFilters.numericList[key].minVal-1);

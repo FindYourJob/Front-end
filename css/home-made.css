@@ -91,3 +91,9 @@
 .text-center{
     text-align: center;
 }
+
+.scroller {
+  white-space: pre-line;
+  overflow: hidden;
+  position: relative;
+}

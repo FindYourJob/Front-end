@@ -1,5 +1,5 @@
 //Define an angular module for our app
-angular.module('FYJApp', ['ngRoute', 'app.controllers'])
+angular.module('FYJApp', ['ngRoute', 'app.controllers','perfect_scrollbar'])
 
 //Define Routing for app
 .config(['$routeProvider', function($routeProvider) {

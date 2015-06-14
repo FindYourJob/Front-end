@@ -121,6 +121,8 @@ D3.update = function(){
 		.text(function(d) { return d.title });
 
 	enode.on("click",function(d){
+		TrendyJob.Informations.generateNodeInfo(d)
+		/*
 			$("#nodeMenu * .panel-title a").empty();
 			$("#nodeMenu * .panel-title a").append(TrendyJob.Informations.generateNodeTitle(d));
 			$("#nodeMenu * .panel-body").empty();
@@ -130,7 +132,7 @@ D3.update = function(){
 			$("#nodeMenu").show("fast");
 			$("#closeNode").click(function(){
 				$("#nodeMenu").hide("fast");
-			});
+			});*/
 		});
 
 
