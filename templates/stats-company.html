@@ -65,6 +65,14 @@
 
 	    d3.xhr(url, function(data) {
 
+	    	data=JSON.parse(data["response"]);
+
+	    	data.sort(function(a,b) {return parseInt(a[paramY])-parseInt(b[paramY]);});
+
+	    	if(data[0].company != undefined){
+		    	widthh = data.length*20;
+		    };
+
 			var margin = {top: 30, right: 20, bottom: 150, left: 40},
 			width = widthh - margin.left - margin.right,
 			height = heightt - margin.top - margin.bottom;
@@ -96,10 +104,6 @@
 			svg.selectAll(".axis").remove(); 
 
 			svg.call(tip);		
-
-	    	data=JSON.parse(data["response"]);
-
-	    	data.sort(function(a,b) {return parseInt(a[paramY])-parseInt(b[paramY]);});
 
 	    	x.domain(data.map(function(d) { return d[paramX] }));
 	    	y.domain([0, d3.max(data, function(d) { return parseInt(d[paramY]); })]);
@@ -182,7 +186,7 @@
 	    });
 	}	
 
-	update("http://trendyjobs.fr/backend/getNbAdvertsByCompany/200",svg1,"company", "nbAdverts",960,300,"#GraphiqueContainer1")
+	update("http://trendyjobs.fr/backend/getNbAdvertsByCompany/800",svg1,"company", "nbAdverts",960,300,"#GraphiqueContainer1")
 
 
 	$('.selectpicker').on('change', function(){
