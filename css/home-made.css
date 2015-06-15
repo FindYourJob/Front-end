@@ -31,12 +31,25 @@
 
 
 /* Carousel */
-  .carousel-inner img {
-    margin: auto;
-  }
   .checkbox label{
     margin-right:12px;
   }
+
+  .slide{
+      width: 800px;
+      height: 300px;
+      margin: auto;
+      background: white no-repeat center;
+  }
+  .slide-1{
+      background-image: url(../images/slide-1.jpg);
+  }
+    .slide-2{
+        background-image: url(../images/slide-2.jpg);
+    }
+    .slide-3{
+        background-image: url(../images/slide-3.jpg);
+    }
 
 
 /* Menu */
