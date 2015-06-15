@@ -1,6 +1,46 @@
 <link href="css/tipsy.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript" src="scripts/jquery.tipsy.js"></script>
+<link rel="stylesheet" type="text/css" href="css/menu.css">
+<script type="text/javascript" src="scripts/menu.js"></script>
 <script type="text/javascript">
+
+
+    //TODO FIXME DUPLICATED CODE FROM GRAPH.JS
+
+    // If D3 namespace doesn't exist we create it
+    if(typeof D3 == "undefined"){
+        D3 = {};
+    }
+    D3.nodes = [];
+    D3.edges = [];
+    D3.size = {};
+    D3.color = {};
+
+    D3.update = function(){
+        D3.overlay.draw();
+    }
+
+    D3.generateColours = function(n){
+        var gColors = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+        var basicColors = gColors.map(function(n){return d3.rgb(n);});
+        var nbColors = basicColors.length;
+        if(n<nbColors){
+            basicColors = basicColors.splice(0,n);
+        } else {
+            var lighter = true;
+            for(var i = nbColors;i<=n;++i){
+                if(i%nbColors == 0){
+                    lighter = !lighter;
+                }
+                if(lighter){
+                    basicColors.push(basicColors[i-nbColors].brighter(.5));
+                } else {
+                    basicColors.push(basicColors[i-nbColors].darker(.5));
+                }
+            }
+        }
+        return basicColors;
+    }
 
 // Create the Google Map…
 var map = new google.maps.Map(d3.select("#map").node(), {
@@ -20,63 +60,192 @@ d3.xhr("http://trendyjobs.fr/backend/getJobAdvertsLocated/10", function(data) {
   {
      data[d]["lat"]=(parseFloat(data[d]["lat"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
      data[d]["long"]=(parseFloat(data[d]["long"])+(Math.random() >0.5 ? 1 : -1)*(Math.random()*0.005)).toString();
+      /*data[d].nodeType = "job";
+      GraphManager.getInstance().addNode(data[d]);*/
   }
 
-  var overlay = new google.maps.OverlayView();
+    $.getScript('scripts/graphManager.js', function () {
+        GraphManager.getInstance().generatePage("job", [], data, angular.element(document.body).scope());
 
-  // Add the container when the overlay is added to the map.
-  overlay.onAdd = function() {
-    var layer = d3.select(this.getPanes().overlayMouseTarget)
-        .append("div")
-        .attr("class", "stations");
+        GraphManager.getInstance().onReady = function () {
 
-    // Draw each marker as a separate SVG element.
-    // We could use a single SVG, but what size would it have?
-    overlay.draw = function() {
-      var projection = this.getProjection(),
-          padding = 10;
+            D3.overlay = new google.maps.OverlayView();
 
-
-      var marker = layer.selectAll("svg")
-          .data(data)
-          .each(transform) // update existing markers
-          .enter().append("svg:svg")
-          .each(transform)
-          .attr("class", "marker")
-
-      // Add a circle.
-      marker.append("svg:circle")
-          .attr("r", 7)
-          .attr("cx", padding)
-          .attr("cy", padding);
+            // Add the container when the overlay is added to the map.
+            D3.overlay.onAdd = function () {
+                D3.layer = d3.select(this.getPanes().overlayMouseTarget)
+                        .append("div")
+                        .attr("class", "stations");
 
 
-      $('svg circle').tipsy({ 
-        gravity: 'w', 
-        html: true, 
-        title: function() {
-          var d = this.__data__;
-          return d.title; 
-        }
-      });
+            };
 
-      $('svg circle').css("cursor","default");
+            $.each(GraphManager.getInstance().getNodes(), function (k, n) {
+                D3.nodes.push(n);
+                n = D3.nodes[k];
+            });
 
 
-      function transform(d) {
-        d = new google.maps.LatLng(d["lat"], d["long"]);
-        d = projection.fromLatLngToDivPixel(d);
-        return d3.select(this)
-            .style("left", (d.x - padding) + "px")
-            .style("top", (d.y - padding) + "px");
-      }
-    };
-  };
+            // Draw each marker as a separate SVG element.
+            // We could use a single SVG, but what size would it have?
+            D3.overlay.draw = function() {
 
-  // Bind our overlay to the map…
-  overlay.setMap(map);
+
+                //TODO FIXME DUPLICATED CODE FROM GRAPH.JS
+                $.each(["size","color"],function(useless,settingType){
+                    $.each(GraphManager.getInstance().getNodeTypes(), function (i, nodeType) {
+                        var consideredNodes = $.grep(D3.nodes, function (n) {
+                            return n.nodeType == nodeType;
+                        });
+                        var scaleType, scale;
+                        scaleType = TrendyJob.Settings.getScaleType(nodeType, settingType);
+                        if (scaleType == "linear") {
+                            D3[settingType][nodeType] = d3.scale.linear()
+                                    .domain([0, d3.max(consideredNodes, function (n) {
+                                        return TrendyJob.Settings.getActualParameter(n, settingType);
+                                    })]);
+
+                            if(settingType == "size"){
+                                D3[settingType][nodeType].range([5, 8]);
+                            } else if(settingType == "color"){
+                                D3[settingType][nodeType].range([d3.rgb(255,243,232), d3.rgb(255,0,0)]);
+                            }
+                        } else {
+                            var tmpArray = consideredNodes.map(function (n) {
+                                return TrendyJob.Settings.getActualParameter(n, settingType)
+                            });
+                            tmpArray = $.grep(tmpArray, function (el, index) {
+                                return index == $.inArray(el, tmpArray);
+                            });
+                            D3[settingType][nodeType] = d3.scale.ordinal()
+                                    .domain(tmpArray);
+                            if(settingType == "size"){
+                                D3[settingType][nodeType].range(tmpArray);
+                            } else if(settingType == "color"){
+                                D3[settingType][nodeType].range(D3.generateColours(tmpArray.length));
+                            }
+
+                        }
+                    });
+                });
+
+
+                var projection = this.getProjection(),
+                        padding = 10;
+
+
+                var marker = D3.layer.selectAll("svg")
+                        .data(D3.nodes)
+                        .each(transform);// update existing markers
+
+
+                var emarker = marker.enter().append("svg:svg")
+                        .each(transform);
+
+                // Add a circle.
+                emarker.append("svg:circle")
+                        //.attr("r", 7)
+                        .attr("cx", padding)
+                        .attr("cy", padding);
+
+
+                marker.selectAll("circle").attr("fill",function(d){ return D3.color[d.nodeType](TrendyJob.Settings.getActualParameter(d,"color"))})
+                        .attr("r", function(d){ return D3.size[d.nodeType](TrendyJob.Settings.getActualParameter(d,"size")); });
+
+                marker.exit().remove();
+
+                $('svg circle').tipsy({
+                    gravity: 'w',
+                    html: true,
+                    title: function() {
+                        var d = this.__data__;
+                        return d.title;
+                    }
+                });
+
+                $('svg circle').css("cursor","default");
+
+
+                function transform(d) {
+                    d = new google.maps.LatLng(d["lat"], d["long"]);
+                    d = projection.fromLatLngToDivPixel(d);
+                    return d3.select(this)
+                            .style("left", (d.x - padding) + "px")
+                            .style("top", (d.y - padding) + "px");
+                }
+            };
+
+            // Bind our overlay to the map…
+            D3.overlay.setMap(map);
+        };
+    });
 });
 
 </script>
 
-<div id="map"></div>
+
+<div id ="map-container">
+    <img class="cbp-spmenu-button" id="left-button1" src="images/parameters.png" alt="parameters"/>
+    <nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left" id="left-menu1">
+        <h3> Paramétres </h3>
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-default" id="panel1">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-target="#collapseOne"
+                           href="" class="collapsed">
+                            Filtres
+                        </a>
+                    </h4>
+
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse">
+                    <div class="panel-body"></div>
+                </div>
+            </div>
+            <div class="panel panel-default" id="panel2">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-target="#collapseTwo"
+                           href="" class="collapsed">
+                            Paramétres
+                        </a>
+                    </h4>
+
+                </div>
+                <div id="collapseTwo" class="panel-collapse collapse">
+                    <div class="panel-body"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="cbp-spmenu" id="nodeMenu" style="display:none;">
+        <div class="clearfix">
+            <h3> Informations </h3>
+	    			<span class="pull-right">
+	    				<span class="glyphicon glyphicon-remove cbp-spmenu-close" id="closeNode"></span>
+	    			</span>
+        </div>
+        <div class="panel-group" id="accordion3">
+            <div class="panel panel-default" id="panel3">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-target="#collapseThree"
+                           href="" class="collapsed">
+                        </a>
+                    </h4>
+
+                </div>
+                <div id="collapseThree" class="panel-collapse collapse">
+                    <div class="panel-body"></div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div id="map">
+    </div>
+
+</div>
+
