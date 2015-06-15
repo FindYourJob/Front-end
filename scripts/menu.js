@@ -32,5 +32,25 @@ $( document ).ready(function(){
 			$("#left-button1").css("display","block");
 		}
 	});
+
+	d3.select("#save").on("click", function(){
+    var content = $('svg').wrap('<p/>').parent().html();
+	$('svg').unwrap();
+        // Canvg requires trimmed content
+        //content = $container.html().trim(),
+        canvas = document.getElementById('svg-canvas');
+
+    // Draw svg on canvas
+    canvg(canvas, content);
+
+    // Change img be SVG representation
+    var theImage = canvas.toDataURL('image/png');
+    $('#svg-img').attr('src', theImage);
+
+	  var a = document.createElement("a");
+	  a.download = "sample.png";
+	  a.href = theImage;
+	  a.click();
+});
 	
 });

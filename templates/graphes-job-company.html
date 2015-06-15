@@ -1,4 +1,5 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
+<script type="text/javascript" src="scripts/canvg.js"></script> 
 <script type="text/javascript" src="scripts/menu.js"></script>
 
 <!-- couldn't find a CDN'd version of vkBeautify, so include it locally -->
@@ -62,6 +63,9 @@
 							<div class="panel-body"></div>
 						</div>
 					</div>
+					<div class="top-buffer">
+						<button class="btn-default" id="save"> Sauver l'image </button>
+					</div>
 				</div>
 			</nav>
 
@@ -89,3 +93,6 @@
 				</div>
     		</nav>
     	</div>
+
+    	<canvas id="svg-canvas" class ="hidden"></canvas>
+		<img id="svg-img" class="hidden"/>

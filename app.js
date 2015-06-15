@@ -9,17 +9,13 @@ angular.module('FYJApp', ['ngRoute', 'app.controllers','perfect_scrollbar'])
 	templateUrl: 'templates/accueil.html',
 	controller: 'AccueilController'
       }).
-      when('/Stats-Annonces', {
-	templateUrl: 'templates/stats-annonces.html',
-	controller: 'DefaultController'
+      when('/Stats-Technologies', {
+	templateUrl: 'templates/stats-techno.html',
+	controller: 'StatsTechnosController'
       }).
       when('/Stats-Company', {
 	templateUrl: 'templates/stats-company.html',
 	controller: 'StatsCompanyController'
-      }).
-      when('/Stats-Annonces', {
-	templateUrl: 'templates/stats-annonces.html',
-	controller: 'DefaultController'
       }).
       when('/Graphe-Job-Company', {
 	templateUrl: 'templates/graphes-job-company.html',

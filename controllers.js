@@ -108,4 +108,11 @@ angular.module('app.controllers', ['isteven-multi-select'])
     .controller("StatsCompanyController", function($scope){
         console.log("Controller StatsCompanyController");
 
+    })
+
+    .controller("StatsTechnosController", function($scope){
+
+        console.log("Controller StatsTechnosController");
+
     });
+

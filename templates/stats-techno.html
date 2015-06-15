@@ -1,0 +1,212 @@
+<script type="text/javascript" src="scripts/canvg.js"></script> 
+<script type="text/javascript" src="scripts/d3.tip.v0.6.3.js"></script>
+<style>
+#scrollArea {
+  overflow:auto;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+    background-color: #F0F0F0 ;
+}
+
+#svg-canvas .hidden {
+    display: none;
+}
+
+#svg-img .hidden {
+    display: none;
+}
+</style>
+
+<script type="text/javascript">
+
+	var svg;
+
+	var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-10, 0])
+	.html(function(d) {
+	  return "<strong>"+d[Object.keys(d)[0]]+" : </strong> <span style='color:red'>" + d[Object.keys(d)[1]]  + "</span>";
+	})
+
+	function update(url,svg,paramX, paramY, widthh, heightt, grapheContainer) {
+
+	    d3.xhr(url, function(data) {
+
+	    	data=JSON.parse(data["response"]);
+
+	    	data.sort(function(a,b) {return parseInt(a[paramY])-parseInt(b[paramY]);});
+
+	    	if(data[0].name != undefined){
+		    	widthh = data.length*20;
+		    };
+
+			var margin = {top: 30, right: 20, bottom: 150, left: 40},
+			width = widthh - margin.left - margin.right,
+			height = heightt - margin.top - margin.bottom;
+
+			var x = d3.scale.ordinal()
+			.rangeRoundBands([0, width], .1);
+
+			var y = d3.scale.linear()
+			.range([height, 0]);
+
+			var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient("bottom");
+
+			var yAxis = d3.svg.axis()
+			.scale(y)
+			.orient("left")
+			.ticks(10);	
+
+			d3.select(grapheContainer).select("svg").remove();	
+
+			svg = d3.select(grapheContainer).append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			svg.selectAll(".bar").remove();
+			svg.selectAll(".axis").remove(); 
+
+			svg.call(tip);		
+
+	    	x.domain(data.map(function(d) { return d[paramX] }));
+	    	y.domain([0, d3.max(data, function(d) { return parseInt(d[paramY]); })]);
+
+
+			var color = d3.scale.linear()
+    		.domain([0, d3.max(data, function(d) { return parseInt(d[paramY])})])
+    		.range(["yellow", "red"]);
+
+			if(data[0].name != undefined){
+	    		document.getElementById("TechnoNameMax").innerHTML = "La techno <strong>"+ data[data.length-1].name +"</strong> est la techno la plus répandue dans les offres avec <strong>"+ data[data.length-1].nbAdverts +"</strong> annonces actuellement.";
+	    	}
+
+
+	    	svg.append("g")
+		    	.attr("class", "x axis")
+		    	.attr("transform", "translate(0," + height + ")")
+		    	.call(xAxis)
+		    	.selectAll("text")  
+		    	.style("text-anchor", "end")
+		    	.attr("dx", "-.8em")
+		    	.attr("dy", ".15em")
+		    	.attr("transform", function(d) {
+		    		return "rotate(-65)" 
+		    	});
+
+	    	svg.append("g")
+		    	.attr("class", "y axis")
+		    	.call(yAxis)
+		    	.append("text")
+		    	.attr("y", 6)
+		    	.attr("dy", "-2em")
+		    	.attr("dx", "1em")
+		    	.style("text-anchor", "end")
+		    	.text(paramY);
+
+	    	svg.selectAll(".bar")
+	    	.data(data)
+	    	.enter().append("rect")
+	    	.attr("class", "bar")
+	    	.attr("fill", function(d) { return color(d[paramY])})
+	    	.attr("x", function(d) { return x(d[paramX]); })
+	    	.attr("width", x.rangeBand())
+	    	.attr("y", function(d) { return y(d[paramY]); })
+	    	.attr("height", function(d) { return height - y(d[paramY]); })
+	    	.on('mouseover', tip.show)
+      		.on('mouseout', tip.hide)
+
+	    });
+	}	
+
+	update("http://trendyjobs.fr/backend/getNbAdvertsByTechnos/800",svg,"name","nbAdverts",960,300,"#GraphiqueContainer")
+
+
+	d3.select("#save").on("click", function(){
+	    var $container = $('#GraphiqueContainer'),
+	        // Canvg requires trimmed content
+	        content = $container.html().trim(),
+	        canvas = document.getElementById('svg-canvas');
+
+	    // Draw svg on canvas
+	    canvg(canvas, content);
+
+	    // Change img be SVG representation
+	    var theImage = canvas.toDataURL('image/png');
+	    $('#svg-img').attr('src', theImage);
+
+		  var a = document.createElement("a");
+		  a.download = "sample.png";
+		  a.href = theImage;
+		  a.click();
+	});
+
+
+
+</script>
+
+<div id="AllStatsContainer" class="container"> 
+	<h1> Toutes les technologies </h1>
+
+	<div class="row">
+		<div id="scrollArea" class="col-md-8">
+  			<div id="GraphiqueContainer"> </div>
+		</div>
+		<div class="col-md-4">
+			<h2> Quelques chiffres </h2>
+			<h3 id="TechnoNameMax"> </h3>
+			<div class="top-buffer">
+				<button class="btn-default" id="save"> Sauver l'image </button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<canvas id="svg-canvas" class ="hidden"></canvas>
+<img id="svg-img" class="hidden"/>
+
+    
