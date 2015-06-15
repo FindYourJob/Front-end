@@ -13,6 +13,7 @@ if(typeof TrendyJob.Filters == "undefined"){
 }
 
 TrendyJob.Filters = {
+    containerSelector : "#left-menu1 #collapseOne .panel-body",
     FiltersType : {
         "numeric" : {
             "display": "<div> <input type=\"number\" id=\"PROPNAME-filter-numeric-over\" name=\"PROPNAME-filter-numeric-over\" value=\"OVER-VAL\" /> &gt; PROPDISPLAY &lt; <input type=\"number\" id=\"PROPNAME-filter-numeric-under\" name=\"PROPNAME-filter-numeric-under\" value=\"UNDER-VAL\"/> </div>"
@@ -165,9 +166,12 @@ TrendyJob.Filters = {
         }
     },
     createPageFilters: function(nodeTypes, scope){
-        var filterBody = $("#left-menu1 #collapseOne .panel-body");
+        var filterBody = $(TrendyJob.Filters.containerSelector);
         for(var i=0;i<nodeTypes.length;++i){
             nodeFilters = TrendyJob.Filters.NodeFilters[nodeTypes[i]];
+            var nodeHead = TrendyJob.Settings.nodeDisplay;
+            nodeHead = nodeHead.replace(/NODETYPEDISPLAY/g,TrendyJob.Informations.ByNode[nodeTypes[i]].display);
+            filterBody.append(nodeHead);
             for (var key in nodeFilters.filtersType) {
                 if (nodeFilters.filtersType.hasOwnProperty(key)) {
                     TrendyJob.Filters.generateFilter(nodeFilters,key, nodeTypes[i], filterBody, scope);

@@ -18,7 +18,25 @@ TrendyJob.Settings = {
     SettingType : {
         "shape" : "<div> PROPDISPLAY : <select id=\"NODETYPE-SETTINGNAME\"> CBLIST </select></div>",
         "size" : "<div> PROPDISPLAY : <select id=\"NODETYPE-SETTINGNAME\"> CBLIST </select></div>",
-        "color" : "<div> PROPDISPLAY : <select id=\"NODETYPE-SETTINGNAME\"> CBLIST </select></div>"
+        "color" : "<div> PROPDISPLAY : <select id=\"NODETYPE-SETTINGNAME\"> CBLIST </select></div>",
+        "numeric" : "<div> PROPDISPLAY : <input type=\"number\" id=\"NODETYPE-SETTINGNAME\" value=DEFAULTVAL> </input> </div>"
+    },
+    GenericGraphSettings : {
+        gravity : {
+            display : "Gravit&eacute;",
+            type : "numeric",
+            default : .05
+        },
+        charge : {
+            display : "Charge",
+            type : "numeric",
+            default : -400
+        },
+        linkDistance : {
+            display : "Distance entre liens",
+            type : "numeric",
+            default : 300
+        }
     },
     ByNode : {
         job : {
@@ -99,6 +117,16 @@ TrendyJob.Settings = {
 
     },
     createPageSettings : function(nodeTypes){
+        $.each(TrendyJob.Settings.GenericGraphSettings, function(k, setting){
+            var html = TrendyJob.Settings.SettingType[setting.type];
+            html = html.replace(/PROPDISPLAY/g,setting.display);
+            html = html.replace(/DEFAULTVAL/g,setting.default);
+            D3[k] = setting.default;
+            html = html.replace(/NODETYPE/g,"GenericGraphSettings");
+            html = html.replace(/SETTINGNAME/g,k);
+            $(TrendyJob.Settings.containerSelector).append(html);
+            $("#GenericGraphSettings-" + k).change(function(){ D3[k] = $(this).val(); D3.update(); })
+        });
         $.each(nodeTypes,function(i,val){
             TrendyJob.Settings.generateNodeSettings(val);
         });

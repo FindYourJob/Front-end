@@ -7,8 +7,6 @@ D3.edges = [];
 D3.force = {};
 D3.size = {};
 D3.color = {};
-D3.charge = -400;
-D3.linkDistance = 300;
 
 D3.generateColours = function(n){
 	var gColors = ["#3366cc", "#dc3912", "#ff9900", "#109618", "#990099", "#0099c6", "#dd4477", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
@@ -138,7 +136,7 @@ D3.update = function(){
 
 	var i=0;
 
-	D3.force.gravity(.05)
+	D3.force.gravity(D3.gravity)
 		.charge(D3.charge)
 		.size([D3.w, D3.h])
 		.linkDistance(D3.linkDistance)
