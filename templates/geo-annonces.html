@@ -51,7 +51,7 @@ var map = new google.maps.Map(d3.select("#map").node(), {
 
 // Load the station data. When the data comes back, create an overlay.
 //d3.json("jobsWithLatLong.json", function(data) {
-d3.xhr("http://trendyjobs.fr/backend/getJobAdvertsLocated/10", function(data) {
+d3.xhr("http://trendyjobs.fr/backend/getJobAdvertsLocated/800", function(data) {
   
   data=JSON.parse(data["response"]);
 
