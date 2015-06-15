@@ -1,4 +1,5 @@
-<script src="scripts/d3.tip.v0.6.3.js"></script>
+<script type="text/javascript" src="scripts/canvg.js"></script> 
+<script type="text/javascript" src="scripts/d3.tip.v0.6.3.js"></script>
 <style>
 .d3-tip {
   line-height: 1;
@@ -27,6 +28,29 @@
   margin: -1px 0 0 0;
   top: 100%;
   left: 0;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+    background-color: #F0F0F0 ;
+}
+
+#svg-canvas .hidden {
+    display: none;
+}
+
+#svg-img .hidden {
+    display: none;
 }
 </style>
 
@@ -173,13 +197,52 @@
 			if(sel[i].__data__.company != undefined){
 				if(sel[i].__data__.company == selected){
 					document.getElementById("CompanyName").innerHTML = "Entreprise : "+ sel[i].__data__.company;
-	    			document.getElementById("NbTotal").innerHTML = "Nombre d'annonces total :  " + sel[i].__data__.nbAdverts;
+					document.getElementById("NbTotal").innerHTML = "Nombre d'annonces total :  " + sel[i].__data__.nbAdverts;
 				}
 			}
 		}
 
 	});
 
+
+d3.select("#save1").on("click", function(){
+    var $container = $('#GraphiqueContainer1'),
+        // Canvg requires trimmed content
+        content = $container.html().trim(),
+        canvas = document.getElementById('svg-canvas');
+
+    // Draw svg on canvas
+    canvg(canvas, content);
+
+    // Change img be SVG representation
+    var theImage = canvas.toDataURL('image/png');
+    $('#svg-img').attr('src', theImage);
+
+	  var a = document.createElement("a");
+	  a.download = "sample.png";
+	  a.href = theImage;
+	  a.click();
+});
+
+d3.select("#save2").on("click", function(){
+    var $container = $('#GraphiqueContainer2'),
+        // Canvg requires trimmed content
+        content = $container.html().trim(),
+        canvas = document.getElementById('svg-canvas');
+
+    // Draw svg on canvas
+    canvg(canvas, content);
+
+    // Change img be SVG representation
+    var theImage = canvas.toDataURL('image/png');
+    $('#svg-img').attr('src', theImage);
+
+	  var a = document.createElement("a");
+	  a.download = "sample.png";
+	  a.href = theImage;
+	  a.click();
+});
+	
 
 
 </script>
@@ -194,6 +257,9 @@
 		<div class="col-md-4">
 			<h2> Quelques chiffres </h2>
 			<h3 id="CompanyNameMax"> </h3>
+			<div class="top-buffer">
+				<button class="btn-default" id="save1"> Sauver l'image </button>
+			</div>
 		</div>
 	</div>
 <h1> Etude d'une entreprise en particulier </h1>
@@ -206,7 +272,15 @@
 			<h2> Quelques chiffres </h2>
 			<h3 id="CompanyName"> </h3>
 			<h3 id="NbTotal">  </h3>
+			<div class="top-buffer">
+				<button class="btn-default" id="save2"> Sauver l'image </button>
+			</div>
 		</div>
 	</div>
+	</div>
 </div>
-	
+
+<canvas id="svg-canvas" class ="hidden"></canvas>
+<img id="svg-img" class="hidden"/>
+
+    
