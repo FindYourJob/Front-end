@@ -37,7 +37,6 @@ D3.update = function(){
 		.on("drag", dragged)
 		.on("dragend", dragended);
 
-	//TODO add type of nodes considered
 	$.each(["size","color"],function(useless,settingType){
 		$.each(GraphManager.getInstance().getNodeTypes(), function (i, nodeType) {
 			var consideredNodes = $.grep(D3.nodes, function (n) {

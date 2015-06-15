@@ -13,9 +13,6 @@ function allCollapsed(){
 $( document ).ready(function(){
 	var menuLeft = $('#left-menu1');
 	var menuButton = $("#left-button1");
-	var topPos = $('.graphContainer').offset().top;
-	//menuButton.offset().top = topPos;
-	//menuLeft.offset().top = topPos;
 	menuButton.css("display","block");
 
 	var menuRight = $("#nodeMenu");
