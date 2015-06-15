@@ -11,15 +11,15 @@
       height: 100%;
       margin-top: -40px;
 
-      -webkit-background-size: 100%;
-      -moz-background-size: 100%;
-      -o-background-size: 100%;
-      background-size: 100%;
+      background: rgb(234,241,247); /* Old browsers */
+      background: -moz-radial-gradient(center, ellipse cover,  rgba(234,241,247,1) 1%, rgba(190,206,221,1) 100%); /* FF3.6+ */
+      background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(1%,rgba(234,241,247,1)), color-stop(100%,rgba(190,206,221,1))); /* Chrome,Safari4+ */
+      background: -webkit-radial-gradient(center, ellipse cover,  rgba(234,241,247,1) 1%,rgba(190,206,221,1) 100%); /* Chrome10+,Safari5.1+ */
+      background: -o-radial-gradient(center, ellipse cover,  rgba(234,241,247,1) 1%,rgba(190,206,221,1) 100%); /* Opera 12+ */
+      background: -ms-radial-gradient(center, ellipse cover,  rgba(234,241,247,1) 1%,rgba(190,206,221,1) 100%); /* IE10+ */
+      background: radial-gradient(ellipse at center,  rgba(234,241,247,1) 1%,rgba(190,206,221,1) 100%); /* W3C */
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaf1f7', endColorstr='#becedd',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 
-      -webkit-background-size: cover;
-      -moz-background-size: cover;
-      -o-background-size: cover;
-      background-size: cover;
   }
   .top-buffer { margin-top:20px; }
   .content {
