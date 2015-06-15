@@ -45,6 +45,10 @@
         background-image: url(../images/slide-3.jpg);
     }
 
+    .carousel-caption{
+        color: #2c3e50;
+    }
+
 
 /* Menu */
   .dropdown:hover .dropdown-menu {
