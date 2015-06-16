@@ -123,6 +123,12 @@
 
 .scroller {
   white-space: pre-line;
-  overflow: hidden;
+  overflow: hidden    ;
   position: relative;
+}
+
+
+.scroller.ps-container > .ps-scrollbar-x-rail,
+.scroller.ps-container > .ps-scrollbar-y-rail {
+    opacity: 0.6;
 }
