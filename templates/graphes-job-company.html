@@ -1,15 +1,21 @@
 <link rel="stylesheet" type="text/css" href="css/menu.css">
 <script type="text/javascript" src="scripts/menu.js"></script>
+
+<!-- couldn't find a CDN'd version of vkBeautify, so include it locally -->
+<script src="scripts/libs/vkbeautify.0.99.00.beta.js"></script>
+<script src="scripts/libs/FileSaver.min.js"></script>
+<script src="scripts/libs/Blob.js"></script>
+
 	<style>
 			.link {
-			  stroke: #ccc;
+			  /*stroke: #ccc;*/
 			}
 
 			.node {
 			  cursor: move;
 			  
-			  stroke: #000;
-			  stroke-width: 1.5px;
+			 /* stroke: #000;
+			  stroke-width: 1.5px;*/
 			}
 
 			.node text {
@@ -23,8 +29,12 @@
     		<img class="cbp-spmenu-button" id="left-button1" src="images/parameters.png" alt="parameters"/>
     		<nav class="cbp-spmenu cbp-spmenu-vertical cbp-spmenu-left" id="left-menu1">
     			<h3> Paramétres </h3>
+
     			<div class="panel-group" id="accordion">
 	    			<div class="panel panel-default" id="panel1">
+						<button class="btn btn-default btn-sm" type="button" id="svgDownload">
+							Télécharger
+						</button>
 				        <div class="panel-heading">
 				             <h4 class="panel-title">
 				        <a data-toggle="collapse" data-target="#collapseOne" 

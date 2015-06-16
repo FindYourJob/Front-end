@@ -83,7 +83,8 @@ D3.update = function(){
 
 
 	link.enter().append("line")
-		.attr("class", "link");
+		.attr("class", "link")
+		.attr("stroke","#ccc");
 
 	link.exit().remove();
 
@@ -103,6 +104,8 @@ D3.update = function(){
 
 	var enode = node.enter().append("g")
 		.attr("class", "node")
+		.attr("stroke","#000")
+		.attr("stroke-width","1.5px")
 		.call(drag);
 
 	enode.append("circle");
@@ -258,6 +261,21 @@ D3.printGraph = function(){
 							});
 
 							D3.update();
-						    //force.start(10,15,20);
+							$("#svgDownload").click(D3.saveAsSvg);
 						});
 };
+
+D3.saveAsSvg = function(){
+		// Get the d3js SVG element
+		var tmp  = $("svg");
+		var svg = $("svg")[0];
+
+		// Extract the data as SVG text string
+		var svg_xml = (new XMLSerializer).serializeToString(svg);
+
+		//Optional: prettify the XML with proper indentations
+		svg_xml = vkbeautify.xml(svg_xml);
+
+		var blob = new Blob([svg_xml], {type: "image/svg+xml"});
+		saveAs(blob, "trendyJob-graph.svg");
+}
