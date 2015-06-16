@@ -139,12 +139,12 @@ GraphManager = (function (){
 			});
 			return retEdges;
 		},
-		//TODO FIXME LOL Jean ne sait pas à quoi sert ceci alors qu'il l'a codé.
+		//TODO FIXME LOL Jean ne sait pas ï¿½ quoi sert ceci alors qu'il l'a codï¿½.
 		getNAID:function(){
 			this.NAID++;
 			return this.NAID;
 		},
-		//FIXME nodeByTitle peut renvoyer plusieurs noeuds => pas bien et pas prévu. En plus devrait p-ê prendre le type en arg
+		//FIXME nodeByTitle peut renvoyer plusieurs noeuds => pas bien et pas prï¿½vu. En plus devrait p-ï¿½ prendre le type en arg
 		findNodeByTitle:function(title){
 			var type;
 			for(type in this.internalNodes){
@@ -181,7 +181,7 @@ GraphManager = (function (){
 			$.getScript('scripts/informations.js', function() {
 				$.getScript('scripts/filters/filters.js', function () {
 					$.getScript('scripts/settings.js', function () {
-							$.getScript('scripts/Model/nodeFactory.js', function () {
+							$.getScript('scripts/model/nodeFactory.js', function () {
 								for (i = 0; i < nodeList.length; ++i) {
 									var gm = GraphManager.getInstance();
 									if(principalNodeType != ""){
