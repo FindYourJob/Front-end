@@ -204,8 +204,8 @@
 		    	}
 		    	select.selectedIndex = 0;
 		    	update("http://trendyjobs.fr/backend/getNbAdvertsCompanyByTechnos/"+d[0].company+"/10",svg2,"name","nbAdverts",700,300,"#GraphiqueContainer2");
-		    	document.getElementById("CompanyName").innerHTML = "Entreprise : "+ d.company;
-	    		document.getElementById("NbTotal").innerHTML = "Nombre d'annonces total : "+ d.nbAdverts;
+		    	document.getElementById("CompanyName").innerHTML = "Entreprise : "+ d[0].company;
+	    		document.getElementById("NbTotal").innerHTML = "Nombre d'annonces total : "+ d[0].nbAdverts;
 
 	    	}
 
