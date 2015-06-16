@@ -1,5 +1,9 @@
 <script type="text/javascript" src="scripts/canvg.js"></script> 
 <script type="text/javascript" src="scripts/d3.tip.v0.6.3.js"></script>
+<!-- couldn't find a CDN'd version of vkBeautify, so include it locally -->
+<script src="scripts/libs/vkbeautify.0.99.00.beta.js"></script>
+<script src="scripts/libs/FileSaver.min.js"></script>
+<script src="scripts/libs/Blob.js"></script>
 <style>
 .d3-tip {
   line-height: 1;
@@ -65,6 +69,22 @@
 	.html(function(d) {
 	  return "<strong>"+d[Object.keys(d)[0]]+" : </strong> <span style='color:red'>" + d[Object.keys(d)[1]]  + "</span>";
 	})
+
+	function saveAsSvg(grapheContainer,name){
+		// Get the d3js SVG element
+		var svg = $("#" + grapheContainer + " svg")[0];
+		console.log($("#" + grapheContainer));
+		console.log(svg);
+
+		// Extract the data as SVG text string
+		var svg_xml = (new XMLSerializer).serializeToString(svg);
+
+		//Optional: prettify the XML with proper indentations
+		svg_xml = vkbeautify.xml(svg_xml);
+
+		var blob = new Blob([svg_xml], {type: "image/svg+xml"});
+		saveAs(blob, "trendyJob-" + name + ".svg");
+	}
 
 	function update(url,svg,paramX, paramY, widthh, heightt, grapheContainer) {
 
@@ -213,25 +233,34 @@
 
 
 d3.select("#save1").on("click", function(){
-    var $container = $('#GraphiqueContainer1'),
-        // Canvg requires trimmed content
-        content = $container.html().trim(),
-        canvas = document.getElementById('svg-canvas');
-
-    // Draw svg on canvas
-    canvg(canvas, content);
-
-    // Change img be SVG representation
-    var theImage = canvas.toDataURL('image/png');
-    $('#svg-img').attr('src', theImage);
-
-	  var a = document.createElement("a");
-	  a.download = "sample.png";
-	  a.href = theImage;
-	  a.click();
+	saveAsSvg("GraphiqueContainer1","entreprise-global");
 });
 
-d3.select("#save2").on("click", function(){
+	d3.select("#save2").on("click", function(){
+		var $container = $('#GraphiqueContainer1'),
+		// Canvg requires trimmed content
+				content = $container.html().trim(),
+				canvas = document.getElementById('svg-canvas');
+
+		// Draw svg on canvas
+		canvg(canvas, content);
+
+		// Change img be SVG representation
+		var theImage = canvas.toDataURL('image/png');
+		$('#svg-img').attr('src', theImage);
+
+		var a = document.createElement("a");
+		a.download = "sample.png";
+		a.href = theImage;
+		a.click();
+	});
+
+	d3.select("#save3").on("click", function(){
+		saveAsSvg("GraphiqueContainer2",$('.selectpicker').find("option:selected").val());
+	});
+
+d3.select("#save4").on("click", function(){
+	console.log("CLICKED");
     var $container = $('#GraphiqueContainer2'),
         // Canvg requires trimmed content
         content = $container.html().trim(),
@@ -265,7 +294,15 @@ d3.select("#save2").on("click", function(){
 			<h2> Quelques chiffres </h2>
 			<h3 id="CompanyNameMax"> </h3>
 			<div class="top-buffer">
-				<button class="btn-default" id="save1"> Sauver l'image </button>
+				<div class="btn-group">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+						T&eacute;l&eacute;charger <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu">
+						<li><a id="save1">SVG</a></li>
+						<li><a id="save2">PNG</a></li>
+					</ul>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -280,7 +317,18 @@ d3.select("#save2").on("click", function(){
 			<h3 id="CompanyName"> </h3>
 			<h3 id="NbTotal">  </h3>
 			<div class="top-buffer">
-				<button class="btn-default" id="save2"> Sauver l'image </button>
+
+				<div class="btn-group">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+						T&eacute;l&eacute;charger <span class="caret"></span>
+					</button>
+					<ul class="dropdown-menu" role="menu">
+						<li><a id="save3">SVG</a></li>
+						<li><a id="save4">PNG</a></li>
+					</ul>
+				</div>
+
+
 			</div>
 		</div>
 	</div>

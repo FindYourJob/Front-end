@@ -267,7 +267,6 @@ D3.printGraph = function(){
 
 D3.saveAsSvg = function(){
 		// Get the d3js SVG element
-		var tmp  = $("svg");
 		var svg = $("svg")[0];
 
 		// Extract the data as SVG text string
