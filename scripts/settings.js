@@ -56,7 +56,7 @@ TrendyJob.Settings = {
                 default : "wage",
                 actual : "wage",
                 attributes : {
-                    wage: "auto",
+                        wage: "auto",
                     //experience : auto,
                     date: "date"/*,
                      datesupp : "date"*/
@@ -121,19 +121,21 @@ TrendyJob.Settings = {
     createPageSettings : function(nodeTypes){
         $.each(TrendyJob.Settings.GenericGraphSettings, function(gk, genericSettings){
             if(typeof D3[gk] != "undefined") {
-                $.each(genericSettings, function(k, setting) {
-                    var html = TrendyJob.Settings.SettingType[setting.type];
-                    html = html.replace(/PROPDISPLAY/g, setting.display);
-                    html = html.replace(/DEFAULTVAL/g, setting.default);
-                    D3[k] = setting.default;
-                    html = html.replace(/NODETYPE/g, "GenericGraphSettings");
-                    html = html.replace(/SETTINGNAME/g, k);
-                    $(TrendyJob.Settings.containerSelector).append(html);
-                    $("#GenericGraphSettings-" + k).change(function () {
-                        D3[k] = $(this).val();
-                        D3.update();
-                    })
-                });
+                if(D3[gk] != null) {
+                    $.each(genericSettings, function (k, setting) {
+                        var html = TrendyJob.Settings.SettingType[setting.type];
+                        html = html.replace(/PROPDISPLAY/g, setting.display);
+                        html = html.replace(/DEFAULTVAL/g, setting.default);
+                        D3[k] = setting.default;
+                        html = html.replace(/NODETYPE/g, "GenericGraphSettings");
+                        html = html.replace(/SETTINGNAME/g, k);
+                        $(TrendyJob.Settings.containerSelector).append(html);
+                        $("#GenericGraphSettings-" + k).change(function () {
+                            D3[k] = $(this).val();
+                            D3.update();
+                        })
+                    });
+                }
             }
         });
         $.each(nodeTypes,function(i,val){
